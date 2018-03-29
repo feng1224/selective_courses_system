@@ -1,6 +1,6 @@
 # -*-coding: utf-8 -*-
-import pickle
-class Teacher:
+import test2
+class Teacher(test2.Persion):
     def __init__(self, name, age, sex, salary, course_name, course_period, course_price):
         self.name = name
         self.age = age
@@ -12,7 +12,7 @@ class Teacher:
         print('Teaching!')
 
 
-class Course:
+class Course(test2.Persion):
     def __init__(self, course_name, course_period, course_price):
         self.course_name = course_name
         self.course_period = course_period
@@ -28,9 +28,10 @@ class Course:
 
 
 teacher1 = Teacher('henry', 29, 'man', 1000, 'Python', 1, 20)
-print(teacher1.__dict__)  # 打印teacher1对象的属性
-print('teacher1 teach %s' % teacher1.course.course_name)  # 打印teacher1对象组合后的来的course属性的course_name属性
-teacher1.course.tell_info()
-
-f = open('test','wb')
-pickle.dump(teacher1,f,0)
+teacher1.talk()
+# print(teacher1.__dict__)  # 打印teacher1对象的属性
+# print('teacher1 teach %s' % teacher1.course.course_name)  # 打印teacher1对象组合后的来的course属性的course_name属性
+# teacher1.course.tell_info()
+#
+# f = open('test','wb')
+# pickle.dump(teacher1,f,0)

@@ -5,7 +5,7 @@ import pickle
 import os
 
 
-class Database(object, metaclass=abc.ABCMeta):
+class AbstractDatabase(object, metaclass=abc.ABCMeta):
     """Database抽象类
         对所有以后可能扩展的数据库类的子类进行归一化
     """
@@ -22,13 +22,30 @@ class Database(object, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
+    def quary(self, sql):
+        """ 查询类的操作
+
+        :return:
+        """
+        pass
+
+    @abc.abstractmethod
+    def nonquary(self,sql):
+        """ 非查询类的操作。
+
+        :param sql:
+        :return:
+        """
+        pass
+
+    @abc.abstractmethod
     def close(self):
         """ 关闭数据库方法
         """
         pass
 
 
-class FileStorage(Database):
+class FileStorage(AbstractDatabase):
     """文件存储类"""
 
     def __init__(self, conn_params, username, password):
@@ -43,7 +60,7 @@ class FileStorage(Database):
         if not os.path.exists(self.db_path):
             os.makedirs(self.db_path)
 
-    def load_data(self, file):
+    def quary(self, file):
         """
         读取数据到内存中
         :param file: 读取的文件名
@@ -53,7 +70,7 @@ class FileStorage(Database):
             data = pickle.load(f)
             return data
 
-    def dump_data(self, file, data):
+    def nonquary(self, file, data):
         """
         从内存中把数据写入到数据库中
         :param file: 写入的文件名
@@ -68,7 +85,7 @@ class FileStorage(Database):
         pass
 
 
-class MysqlStroage(Database):
+class MysqlStroage(AbstractDatabase):
     """Mysql存储类
         扩展功能
     """
@@ -76,6 +93,12 @@ class MysqlStroage(Database):
         super(MysqlStroage, self).__init__(conn_params, username, password)
 
     def connect(self):
+        pass
+
+    def quary(self, sql):
+        pass
+
+    def nonquary(self,sql):
         pass
 
     def close(self):
