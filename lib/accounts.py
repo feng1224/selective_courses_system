@@ -4,10 +4,11 @@ from lib import db
 from conf import settings
 import hashlib
 import os
-
+from lib import persion
 
 class Accounts(object):
     storage = db.inter_db_handler(settings.ACCOUNT_DATABASE)
+    human = persion.Teacher()
 
     def __init__(self):
         self.id = None
@@ -31,6 +32,7 @@ class Accounts(object):
         else:
             result = self.storage.quary(self.id)
             if self.password == result.password:
+                print(result.__dict__)
                 return result
             else:
                 return False
@@ -74,16 +76,33 @@ class Accounts(object):
         else:
             return False
 
-    def show_info(self):
+    def set_info(self, account_data, name, sex, age):
+        self.human.name = name
+        self.human.sex = sex
+        self.human.age = age
+        account_data.user_info = self.human
+        self.storage.nonquary(self.id, account_data)
+        return account_data
+
+class StudentAccounts(Accounts):
+
+    def __init__(self):
         pass
 
-# class Admin(Accounts):
-#
-#     def __init__(self,username, password, type, status):
-#         super(Admin, self).__init__(username, password, type, status)
-#
+class AdminAccounts(Accounts):
+
+    def __init__(self,username, password, type, status):
+        super(AdminAccounts, self).__init__(username='admin', password='admin', type=0, status=0)
+
 if __name__ == '__main__':
+    import pickle
     ac = Accounts()
-    #ac.setter('henry','henry',1,2)
-    print(ac.getter('henry','henry'))
+    ac.setter('1234','12345',1,2)
+
     print(ac.__dict__)
+    ac.set_info('1234','12345',19)
+    print(ac.__dict__)
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    print(base_dir)
+    with open('%s/db/accounts/%s'% (base_dir,ac.id)) as f:
+        print(pickle.load(f.encoding('utf-8')))

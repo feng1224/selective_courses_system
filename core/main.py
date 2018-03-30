@@ -1,7 +1,6 @@
 # -*-coding: utf-8 -*-
 # Auther： Henry Yuan
 import sys
-from . import operators
 from lib import views
 from lib import accounts
 
@@ -11,9 +10,10 @@ user_data = {
     'account_data': None
 }
 
-account = accounts.Accounts()
-student_views = views.StudentView()
-def interactive(menu, menu_dict):
+
+student_view = views.StudentView()
+teacher_view = views.TeacherView()
+def interactive(menu, menu_dict, obj):
     """ 主菜单接口。
         用户首先登录主菜单，选择进入具体的通道。
 
@@ -29,68 +29,88 @@ def interactive(menu, menu_dict):
         else:
             print('选项不存在')
 
-def homepage():
+def homepage(obj=None):
     menu = '''
-    1. 学生登录通道
-    2. 教师登录通道
-    3. 管理员登录通道
-    4. 退出
+===============欢迎进入老男孩学校===============
+                1. 学生登录通道
+                2. 教师登录通道
+                3. 管理员登录通道
+                4. 退出
+================================================
     '''
     menu_dict = {'1': 'student_homepage()',
                  '2': 'views.TeacherView()',
                  '3': 'views.AdminView()',
-                 '4': 'logout()'}
-    result = interactive(menu, menu_dict)
+                 '4': 'exit()'}
+    result = interactive(menu, menu_dict,obj)
     return result
 
-def student_homepage():
+def student_homepage(obj=student_view):
 
     menu = '''
-    ===============欢迎进入学员视图===============
-                      1. 注册
-                      2. 账户信息
-                      3. 选择课程
-    ==============================================
+===============欢迎进入学员视图===============
+               1. 注册账号
+               2. 填写个人信息
+               3. 查看账户信息
+               4. 选择课程并付费
+               5. 查看学习记录
+               6. 注销
+==============================================
     '''
-    menu_dict = {
-                 '1': 'register()',
-                 '2': 'infomation()',
-                 '3': 'choise()'}
-    interactive(menu, menu_dict)
+    menu_dict = {'1': 'register(obj)',
+                 '2':  'set(obj)',
+                 '3': 'tell(obj)',
+                 '4': 'choise(obj)',
+                 '5': 'record(obj)',
+                 '6': 'logout(obj)'}
+    interactive(menu, menu_dict, obj)
+
+def teacher_homepage(obj=teacher_view):
+
+    menu = '''
+===============欢迎进入学员视图===============
+               1. 注册账号
+               2. 补充个人信息
+               3. 查看账户信息
+               4. 选择课程
+==============================================
+    '''
+    menu_dict = {'1': 'register(obj)',
+                 '2':  'set(obj)',
+                 '3': 'tell(obj)',
+                 '4': 'choise_pay(obj)'}
+    interactive(menu, menu_dict, obj)
 
 def login(func):
-    def inner():
-        # exit_flag = True
-        # while exit_flag:
-        #     if user_data['is_authenticated'] == False:
-        #         result = student_views.login()
-        #         if result:
-        #             print('\033[34;1mLogin Success！\033[0m')
-        #             user_data['account_id'] = result.id
-        #             user_data['is_authenticated'] = True
-        #             user_data['account_data'] = result
-        #             exit_flag = False
-        #             func()
-        #         else:
-        #             print('\031[34;1mUsername or Password error！\033[0m')
-        #     else:
-        #         exit_flag = False
-        #         func()
-        student_views.login()
-        func()
+    """ 登录函数
+
+    :param func:
+    :return:
+    """
+    def inner(*args,**kwargs):
+        if args[0].login():
+            func(*args,**kwargs)
     return inner
 
-def register():
-    student_views.register()
+def register(obj):
+    obj.register()
 
+@login
+def set(obj):
+    obj.set_info()
 
 
 @login
-def infomation():
-    student_views.tell()
+def tell(obj):
+    obj.tell_info()
     #print(obj.__dict__)
 
-def logout():
+
+def logout(obj):
+    obj.logout()
+
+def exit():
+    print('\033[34;1m欢迎使用本系统，下次再见！\033[0m')
     sys.exit()
 
 def run():
