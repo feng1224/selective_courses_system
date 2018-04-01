@@ -5,6 +5,7 @@ from lib import accounts
 
 class View(object):
     """ 视图父类 """
+
     account = accounts.Accounts()  # 关联Accounts对象，后续的登录，注册都需要使用
     user_data = {
         'account_id': None,
@@ -86,6 +87,7 @@ class View(object):
         """
         user_data_obj = self.user_data['account_data']
         user_info_data = user_data_obj.user_info
+        print(user_info_data)
         # 通过反射，判断user_info_data对象中是否想相应的属性。如有就赋值。如没有设置为Null
         if hasattr(user_info_data, 'name'):
             name = getattr(user_info_data, 'name')
@@ -104,15 +106,15 @@ class View(object):
 
         info = '''
 ==================账户信息==================
-         ID：         %s
-         Account：   %s
-         Fullname：   %s
-         Age：        %s
-         Sex：        %s
-         Type：       %s
-         Status:      %s
+         ID：         \033[34;1m%s\033[0m
+         Account：    \033[34;1m%s\033[0m
+         Fullname：   \033[34;1m%s\033[0m
+         Age：        \033[34;1m%s\033[0m
+         Sex：        \033[34;1m%s\033[0m
+         Type：       \033[34;1m%s\033[0m
+         Status:      \033[34;1m%s\033[0m
 ============================================
-        ''' %(user_data_obj.id, user_data_obj.username, name, age, sex, user_data_obj.type, user_data_obj.status)
+        ''' % (user_data_obj.id, user_data_obj.username, name, age, sex, user_data_obj.account_type, user_data_obj.status)
         print(info)
 
     def set_info(self):
@@ -142,16 +144,22 @@ class View(object):
 
 
 class StudentView(View):
+    """ 学生视图 """
 
     def __init__(self):
         super(StudentView, self).__init__()
 
-    def choise(self):
+    def choise_courses(self):
         """ 选课视图方法
 
         :return:
         """
-        pass
+        exit_flag = True
+        while exit_flag:
+            print('Input school and course. Input format like "beijing.python"')
+            course = input('Please input your school and course():').strip()
+            # obj = self.
+            exit_flag = False
 
     def payment(self):
         """ 付款视图方法
@@ -159,6 +167,20 @@ class StudentView(View):
         :return:
         """
         pass
+
+
+class TeacherView(object):
+    """ 老师视图 """
+
+    def __init__(self):
+        super(TeacherView, self).__init__()
+
+
+class AdminView(object):
+    """ 管理员视图 """
+
+    def __init__(self):
+        super(AdminView, self).__init__()
 
 
 #     account = accounts.Accounts()  # 关联Accounts对象，后续的登录，注册都需要使用
@@ -295,16 +317,6 @@ class StudentView(View):
 #             'is_authenticated': False,
 #             'account_data': None}
 #         print('\033[34;1m Account logout!\033[0m')
-
-
-class TeacherView(object):
-    pass
-
-
-class AdminView(object):
-    def homepage(self):
-        pass
-
 # def Ilogin(obj):
 #     EXIT_FLAG = True
 #     while EXIT_FLAG:

@@ -2,32 +2,32 @@
 # Auther： Henry Yuan
 import sys
 from lib import views
-from lib import accounts
 
 user_data = {
     'account_id': None,
     'is_authenticated': False,
     'account_data': None
 }
-
-
 student_view = views.StudentView()
 teacher_view = views.TeacherView()
-def interactive(menu, menu_dict, obj):
+admin_view = views.AdminView()
+
+
+def interactive(menu, menu_dict, obj, flag):
     """ 主菜单接口。
         用户首先登录主菜单，选择进入具体的通道。
 
     :return:
     """
-
-    Flag = True
-    while Flag:
+    exit_flag = True
+    while exit_flag:
         print(menu)
         cmd = input('>>:').strip()
         if cmd in menu_dict:
             eval(menu_dict[cmd])
         else:
             print('选项不存在')
+
 
 def homepage(obj=None):
     menu = '''
@@ -39,31 +39,32 @@ def homepage(obj=None):
 ================================================
     '''
     menu_dict = {'1': 'student_homepage()',
-                 '2': 'views.TeacherView()',
-                 '3': 'views.AdminView()',
-                 '4': 'exit()'}
-    result = interactive(menu, menu_dict,obj)
-    return result
+                 '2': 'teacher_homepage()',
+                 '3': 'admin_homepage()',
+                 '4': 'exit_system()'}
+    interactive(menu, menu_dict, obj, flag=True)
+
 
 def student_homepage(obj=student_view):
 
     menu = '''
 ===============欢迎进入学员视图===============
                1. 注册账号
-               2. 填写个人信息
+               2. 填写账户信息
                3. 查看账户信息
                4. 选择课程并付费
                5. 查看学习记录
                6. 注销
 ==============================================
     '''
-    menu_dict = {'1': 'register(obj)',
-                 '2':  'set(obj)',
-                 '3': 'tell(obj)',
-                 '4': 'choise(obj)',
-                 '5': 'record(obj)',
-                 '6': 'logout(obj)'}
-    interactive(menu, menu_dict, obj)
+    menu_dict = {'1': 'sign_up(obj)',
+                 '2': 'set_information(obj)',
+                 '3': 'tell_information(obj)',
+                 '4': 'choice_course(obj)',
+                 '5': 'tell_record(obj)',
+                 '6': 'sign_out(obj)'}
+    interactive(menu, menu_dict, obj, flag=True)
+
 
 def teacher_homepage(obj=teacher_view):
 
@@ -78,8 +79,28 @@ def teacher_homepage(obj=teacher_view):
     menu_dict = {'1': 'register(obj)',
                  '2':  'set(obj)',
                  '3': 'tell(obj)',
-                 '4': 'choise_pay(obj)'}
-    interactive(menu, menu_dict, obj)
+                 '4': 'choice_pay(obj)'}
+    interactive(menu, menu_dict, obj, flag=True)
+
+
+def admin_homepage(obj=admin_view):
+    menu = '''
+    ===============欢迎进入学员视图===============
+                   1. 创建学校
+                   2. 创建课程
+                   3. 创建班级
+                   4. 创建讲师
+                   5. 创建学员
+                   6. 注销
+    ==============================================
+        '''
+    menu_dict = {'1': 'create_school(obj)',
+                 '2': 'create_courses(obj)',
+                 '3': 'create_classes(obj)',
+                 '4': 'create_teachers(obj)',
+                 '5': 'create_students(obj)'}
+    interactive(menu, menu_dict, obj, flag=True)
+
 
 def login(func):
     """ 登录函数
@@ -87,31 +108,104 @@ def login(func):
     :param func:
     :return:
     """
-    def inner(*args,**kwargs):
+    def inner(*args, **kwargs):
         if args[0].login():
-            func(*args,**kwargs)
+            func(*args, **kwargs)
     return inner
 
-def register(obj):
+
+def sign_up(obj):
+    """ 注册函数
+
+    :param obj: 传入需要的视图对象
+    :return:
+    """
     obj.register()
 
+
 @login
-def set(obj):
+def set_information(obj):
+    """ 设置账号信息函数
+
+    :param obj: 传入需要的视图对象
+    :return:
+    """
     obj.set_info()
 
 
 @login
-def tell(obj):
+def tell_information(obj):
+    """ 查看账户信息函数
+
+    :param obj: 传入需要的视图对象
+    :return:
+    """
     obj.tell_info()
-    #print(obj.__dict__)
 
 
-def logout(obj):
+@login
+def choice_course(obj):
+    """ 选择课程函数
+
+    :param obj: 传入需要的视图对象
+    :return:
+    """
+    obj.choise_courses()
+
+
+@login
+def tell_record(obj):
+    """ 查看学习记录函数
+
+    :param obj: 传入需要的视图对象
+    :return:
+    """
+    pass
+
+
+def sign_out(obj):
+    """ 注销函数
+
+    :param obj: 传入需要的视图对象
+    :return:
+    """
     obj.logout()
+    homepage()
 
-def exit():
+
+def exit_system():
+    """ 退出系统函数
+
+    :return:
+    """
     print('\033[34;1m欢迎使用本系统，下次再见！\033[0m')
     sys.exit()
+
+
+def create_school(obj):
+    """ 创建学校函数
+
+    :param obj: 传入需要的视图对象
+    :return:
+    """
+    pass
+
+
+def create_courses(obj):
+    pass
+
+
+def create_classes(obj):
+    pass
+
+
+def create_teachers(obj):
+    pass
+
+
+def create_students(obj):
+    pass
+
 
 def run():
     homepage()

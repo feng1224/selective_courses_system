@@ -6,6 +6,7 @@ import hashlib
 import os
 from lib import persion
 
+
 class Accounts(object):
     storage = db.inter_db_handler(settings.ACCOUNT_DATABASE)
     human = persion.Teacher()
@@ -14,7 +15,7 @@ class Accounts(object):
         self.id = None
         self.username = None
         self.password = None
-        self.type = None
+        self.account_type = None
         self.status = None
         self.user_info = None
 
@@ -32,13 +33,12 @@ class Accounts(object):
         else:
             result = self.storage.quary(self.id)
             if self.password == result.password:
-                print(result.__dict__)
+                # print(result.__dict__)
                 return result
             else:
                 return False
 
-
-    def setter(self, username, password, type, status):
+    def setter(self, username, password, account_type, status):
         """ 创建账号
             对应View类的register方法。用以注册、创建账号时使用
 
@@ -47,7 +47,7 @@ class Accounts(object):
         self.id = self.create_hash(username)
         self.username = username
         self.password = self.create_hash(password)
-        self.type = type
+        self.account_type = account_type
         self.status = status
         if self.__check_username():
             self.storage.nonquary(self.id, self)  # 存储到数据库
@@ -84,15 +84,19 @@ class Accounts(object):
         self.storage.nonquary(self.id, account_data)
         return account_data
 
+
 class StudentAccounts(Accounts):
 
     def __init__(self):
         pass
 
+
 class AdminAccounts(Accounts):
 
-    def __init__(self,username, password, type, status):
-        super(AdminAccounts, self).__init__(username='admin', password='admin', type=0, status=0)
+    def __init__(self):
+        pass
+        # super(AdminAccounts, self).__init__(username='admin', password='admin', account_type=0, status=0)
+
 
 if __name__ == '__main__':
     import pickle

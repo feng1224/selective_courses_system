@@ -31,6 +31,7 @@ class Schools(object):
         else:
             return False
 
+    @property
     def getter(self):
         """ 获取学校方法
 
