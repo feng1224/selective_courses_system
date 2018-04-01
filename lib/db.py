@@ -148,7 +148,11 @@ if __name__ == '__main__':
     print(db)
     print(db.__dict__)
     inter_db_connect(db)
-    db.dump_data('test',{'name':1},)
+    db.nonquary('test',{'name':1},)
     db = inter_db_handler(settings.BASE_DATABASE)
     print(db)
     print(db.__dict__)
+
+    db = inter_db_handler(settings.ADMIN_ACCOUNT_DATABASE)
+    inter_db_connect(db)
+    db.nonquary('test', {'name': 1}, )

@@ -93,7 +93,8 @@ class StudentAccounts(Accounts):
 
 class AdminAccounts(Accounts):
 
-    storage = db.inter_db_handler(settings.ACCOUNT_DATABASE)
+    storage = db.inter_db_handler(settings.ADMIN_ACCOUNT_DATABASE)
+
     def __init__(self):
         super(AdminAccounts, self).__init__()
 
@@ -106,6 +107,23 @@ class AdminAccounts(Accounts):
         """
         if username != 'admin':
             pass
+
+    def setter(self, username='admin', password='admin', account_type=0, status=0):
+        """ 创建账号
+            对应View类的register方法。用以注册、创建账号时使用
+
+        :return:
+        """
+        # self.id = self.create_hash(username)
+        self.username = username
+        self.password = self.create_hash(password)
+        self.account_type = account_type
+        self.status = status
+        if self.__check_username():
+            self.storage.nonquary(self.id, self)  # 存储到数据库
+            return self
+        else:
+            return False
 
 
 if __name__ == '__main__':

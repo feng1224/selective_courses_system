@@ -179,6 +179,8 @@ class TeacherView(View):
 class AdminView(View):
     """ 管理员视图 """
 
+    account = accounts.Accounts()
+    account.setter(username='admin', password='admin', account_type=0, status=0)
     def __init__(self):
         super(AdminView, self).__init__()
 

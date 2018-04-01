@@ -12,7 +12,7 @@ ACCOUNT_DATABASE = {
     'path': "%s/db" % BASE_DIR
 }
 
-ACCOUNT_DATABASE = {
+ADMIN_ACCOUNT_DATABASE = {
     'engine': 'file_storage',
     'name': 'admin_accounts',
     'username': None,
