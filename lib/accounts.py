@@ -105,8 +105,7 @@ class AdminAccounts(Accounts):
         :param password:
         :return:
         """
-        if username != 'admin':
-            pass
+        super(AdminAccounts, self).getter(username, password)
 
     def setter(self, username='admin', password='admin', account_type=0, status=0):
         """ 创建账号
@@ -114,14 +113,16 @@ class AdminAccounts(Accounts):
 
         :return:
         """
-        # self.id = self.create_hash(username)
-        self.username = username
-        self.password = self.create_hash(password)
-        self.account_type = account_type
-        self.status = status
-        if self.__check_username():
-            self.storage.nonquary(self.id, self)  # 存储到数据库
-            return self
+        super(AdminAccounts, self).setter(username, password, account_type, status)
+
+    def __check_username(self):
+        """ 检查账号的用户名是否存在数据库
+
+        :param username:
+        :return:
+        """
+        if not os.path.exists('%s/%s' % (self.storage.db_path, self.id)):
+            return True
         else:
             return False
 
