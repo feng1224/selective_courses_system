@@ -98,7 +98,8 @@ def admin_homepage(obj=admin_view):
                  '2': 'create_courses(obj)',
                  '3': 'create_classes(obj)',
                  '4': 'create_teachers(obj)',
-                 '5': 'create_students(obj)'}
+                 '5': 'create_students(obj)',
+                 '6': 'sign_out(obj)'}
     interactive(menu, menu_dict, obj, flag=True)
 
 
@@ -181,7 +182,7 @@ def exit_system():
     print('\033[34;1m欢迎使用本系统，下次再见！\033[0m')
     sys.exit()
 
-
+@login
 def create_school(obj):
     """ 创建学校函数
 
@@ -191,10 +192,12 @@ def create_school(obj):
     pass
 
 
+@login
 def create_courses(obj):
     pass
 
 
+@login
 def create_classes(obj):
     pass
 
@@ -203,6 +206,7 @@ def create_teachers(obj):
     pass
 
 
+@login
 def create_students(obj):
     pass
 

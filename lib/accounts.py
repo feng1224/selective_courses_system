@@ -93,9 +93,19 @@ class StudentAccounts(Accounts):
 
 class AdminAccounts(Accounts):
 
+    storage = db.inter_db_handler(settings.ACCOUNT_DATABASE)
     def __init__(self):
-        pass
-        # super(AdminAccounts, self).__init__(username='admin', password='admin', account_type=0, status=0)
+        super(AdminAccounts, self).__init__()
+
+    def getter(self, username='admin', password='admim'):
+        """
+
+        :param username:
+        :param password:
+        :return:
+        """
+        if username != 'admin':
+            pass
 
 
 if __name__ == '__main__':

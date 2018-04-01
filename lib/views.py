@@ -169,14 +169,14 @@ class StudentView(View):
         pass
 
 
-class TeacherView(object):
+class TeacherView(View):
     """ 老师视图 """
 
     def __init__(self):
         super(TeacherView, self).__init__()
 
 
-class AdminView(object):
+class AdminView(View):
     """ 管理员视图 """
 
     def __init__(self):
