@@ -27,3 +27,6 @@ BASE_DATABASE = {
     'password': None,
     'path': "%s/db" % BASE_DIR
 }
+
+DEFAULT_ADMIN_ACCOUNT = 'admin'
+DEFAULT_ADMIN_PASSWORD = 'admin'

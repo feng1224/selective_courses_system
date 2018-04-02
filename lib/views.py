@@ -1,12 +1,16 @@
 # -*-coding: utf-8 -*-
 # Auther： Henry Yuan
-from lib import accounts
+from lib.accounts import *
+from lib.schools import *
+from lib.courses import *
 
 
 class View(object):
     """ 视图父类 """
 
-    account = accounts.Accounts()  # 关联Accounts对象，后续的登录，注册都需要使用
+    account = Accounts()  # 关联Accounts对象，后续的登录，注册都需要使用
+    school = Schools()
+    course = Courses()
     user_data = {
         'account_id': None,
         'is_authenticated': False,
@@ -17,6 +21,10 @@ class View(object):
         self.menu_dict = None
         self.result = None
         self.account_obj = None
+        # self.user_data = {
+        #     'account_id': None,
+        #     'is_authenticated': False,
+        #     'account_data': None}
 
     def login(self):
         """ 登录视图
@@ -114,7 +122,8 @@ class View(object):
          Type：       \033[34;1m%s\033[0m
          Status:      \033[34;1m%s\033[0m
 ============================================
-        ''' % (user_data_obj.id, user_data_obj.username, name, age, sex, user_data_obj.account_type, user_data_obj.status)
+        ''' % (user_data_obj.id, user_data_obj.username, name, age,
+               sex, user_data_obj.account_type, user_data_obj.status)
         print(info)
 
     def set_info(self):
@@ -135,12 +144,35 @@ class View(object):
                 print('\033[34;1mSet Success！\033[0m')
                 exit_flag = False
 
+    def change_password(self):
+        # print(self.user_data['account_data'])
+        exit_flag = True
+        while exit_flag:
+            old_password = input('Please input your old password:').strip()
+            new_password = input('Please input your new password:').strip()
+            re_new_password = input('Please input your new pasword confirmation:').strip()
+
+            obj = self.account.getter(self.user_data['account_data'].username, old_password)
+            # print(obj.__dict__)
+            if obj:
+                if not new_password or not re_new_password:
+                    print('\033[31;1mError:Password cannot be null!\033[0m')
+                elif new_password != re_new_password:
+                    print('\033[31;1mError:Password do not match!\033[0m')
+                else:
+                    result = self.account.change_password(obj, new_password)
+                    if result:
+                        exit_flag = False
+            else:
+                print('\033[31;1mError: Password error!\033[0m')
+
     def logout(self):
         self.user_data = {
             'account_id': None,
             'is_authenticated': False,
             'account_data': None}
         print('\033[34;1m Account logout!\033[0m')
+        print(self.user_data)
 
 
 class StudentView(View):
@@ -179,12 +211,75 @@ class TeacherView(View):
 class AdminView(View):
     """ 管理员视图 """
 
-    account = accounts.AdminAccounts()
-    account.setter(username='admin', password='admin', account_type=0, status=0)
+    account = AdminAccounts()
+    account.setter()
+    #school = Schools()
+    #course = Courses()
 
     def __init__(self):
         super(AdminView, self).__init__()
 
+    def login(self):
+        result = super(AdminView, self).login()
+        if result:
+            return result
+        else:
+            return False
+
+    def create_school(self):
+        """ 管理员创建学校视图方法
+
+        :return:
+        """
+        # print('haha')
+        exit_flag = True
+        while exit_flag:
+            print('================创建学校=================')
+            name = input('Please input name of school:').strip()
+            city = input('Please input city of school:').strip()
+            location = input('Please input address of school:').strip()
+            if not name or not city:
+                print('\033[031;1m Error: Cannot be null!')
+            else:
+                obj = self.school.setter(name, city, location)
+                if obj:
+                    print('\033[034;1mCreate school success!\033[0m')
+                    exit_flag = False
+                else:
+                    print('\033[031;1mSchool has already existed!\033[0m')
+                    exit_flag = False
+                #print(obj.__dict__)
+
+    def create_courses(self):
+        """ 管理员创建课程视图方法
+
+        :return:
+        """
+        exit_flag = True
+        while exit_flag:
+            print('================创建课程=================')
+            course = input('Please create course:')
+            price = input('Please input price:')
+            period = input('Please input term:')
+            school = input('Please input associated school:')
+            if not course or not price or not period or not school:
+                print('\033[031;1m Cannot be null!\033[0m')
+            elif not price.isdigit() or not period.isdigit():
+                print('\033[031;1m Price and Period must be integer!\033[0m')
+            else:
+                obj = self.course.setter(course, int(price), int(period)) # 创建一个course的对象
+                if obj:
+                    self.school.set_courses(school,obj)
+                    # print(obj.__dict__)
+                    # print(obj.name)
+
+
+    def logout(self):
+        """ 管理员登出方法
+
+        :return:
+        """
+        super(AdminView, self).logout()
 
 #     account = accounts.Accounts()  # 关联Accounts对象，后续的登录，注册都需要使用
 #     def __init__(self):
