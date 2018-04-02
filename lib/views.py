@@ -16,6 +16,12 @@ class View(object):
         'is_authenticated': False,
         'account_data': None}
 
+    school_data = {'school': None,
+                   'course': [],
+                   'class': [],
+                   'teacher': [],
+                   'student': []}
+
     def __init__(self):
         self.menu = None
         self.menu_dict = None
@@ -213,8 +219,6 @@ class AdminView(View):
 
     account = AdminAccounts()
     account.setter()
-    #school = Schools()
-    #course = Courses()
 
     def __init__(self):
         super(AdminView, self).__init__()
@@ -243,6 +247,8 @@ class AdminView(View):
             else:
                 obj = self.school.setter(name, city, location)
                 if obj:
+                    self.school_data['school'] = obj
+                    self.school.create_school(name, self.school_data)
                     print('\033[034;1mCreate school success!\033[0m')
                     exit_flag = False
                 else:

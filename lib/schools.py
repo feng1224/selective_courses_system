@@ -26,11 +26,10 @@ class Schools(object):
         :param location:
         :return:
         """
-        if self.__check_name(name, city, location):
+        if self.__check_name(name):
             self.name = name
             self.city = city
             self.location = location
-            self.storage.nonquary(self.name, self)
             return self
         else:
             return False
@@ -45,6 +44,9 @@ class Schools(object):
         else:
             return self.storage.quary(name)
 
+    def create_school(self, name, value):
+        print(value)
+        self.storage.nonquary(name, value)
     # def tell_school(self):
         #pass
 
