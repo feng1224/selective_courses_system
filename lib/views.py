@@ -248,7 +248,7 @@ class AdminView(View):
                 obj = self.school.setter(name, city, location)
                 if obj:
                     self.school_data['school'] = obj
-                    self.school.create_school(name, self.school_data)
+                    self.school.set_info(name, self.school_data)
                     print('\033[034;1mCreate school success!\033[0m')
                     exit_flag = False
                 else:
@@ -273,12 +273,18 @@ class AdminView(View):
             elif not price.isdigit() or not period.isdigit():
                 print('\033[031;1m Price and Period must be integer!\033[0m')
             else:
-                obj = self.course.setter(course, int(price), int(period)) # 创建一个course的对象
+                obj = self.course.setter(course, int(price), int(period))  # 创建一个course的对象
                 if obj:
-                    self.school.set_courses(school,obj)
-                    # print(obj.__dict__)
-                    # print(obj.name)
+                    result = self.school.getter(school)
+                    if result:
+                        result['course'].append(obj)
+                        self.school.set_info(school, result)
+                        print(result)
+                    else:
+                        print('\033[031;1mSchool does not exist\033[0m')
 
+    def create_classes(self):
+        pass
 
     def logout(self):
         """ 管理员登出方法

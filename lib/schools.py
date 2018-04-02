@@ -44,11 +44,8 @@ class Schools(object):
         else:
             return self.storage.quary(name)
 
-    def create_school(self, name, value):
-        print(value)
+    def set_info(self, name, value):
         self.storage.nonquary(name, value)
-    # def tell_school(self):
-        #pass
 
     def __check_name(self, name):
         """ 检查方法
@@ -62,15 +59,15 @@ class Schools(object):
         else:
             return False
 
-    def set_courses(self, school, course_obj):
-        result = self.getter(school)
-        if result:
-            print(result.__dict__)
-            result.course_list[course_obj] = course_obj
-            print(result.__dict__)
-        else:
-            return False
-        #self.storage.nonquary(self)
+    # def set_courses(self, school, course_obj):
+    #     result = self.getter(school)
+    #     if result:
+    #         print(result.__dict__)
+    #         result.course_list[course_obj] = course_obj
+    #         print(result.__dict__)
+    #     else:
+    #         return False
+    #     #self.storage.nonquary(self)
 
 
 if __name__ == '__main__':

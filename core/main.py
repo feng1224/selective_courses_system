@@ -246,9 +246,10 @@ def create_classes(obj):
     :param obj: 传入需要的视图对象
     :return:
     """
-    pass
+    obj.create_school()
 
 
+@login
 def create_teachers(obj):
     pass
 
