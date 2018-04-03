@@ -326,8 +326,20 @@ class AdminView(View):
                 print('\033[031;1m Price and Period must be integer!\033[0m')
             elif not school_result:
                 print('\033[031;1mSchool does not exist\033[0m')
+            elif course_name in school_result['course']:
+                print('\033[031;1mCourse has already existed!\033[0m')
             else:
-                print(school_result)
+                # print(school_result)
+                obj = self.course.setter(course_name, int(price), int(period))
+                if obj:
+                    school_result['course'][course_name] = obj
+                    print(school_result)
+                    self.base_storage.nonquary(school_name, school_result)
+                    print('\033[034;1mCreate course success!\033[0m')
+                    exit_flag = False
+                else:
+                    print('\033[031;1mCreate course failed!\033[0m')
+                    exit_flag = False
                 # print(school_result)
                 # if school_result['course'] == []:
                 #     obj = self.course.setter(course_name, int(price), int(period))
@@ -348,7 +360,6 @@ class AdminView(View):
                 #         self.school.set_info(school_name, school_result)
                 #         print('\033[034;1mCreate course success!\033[0m')
                 #         exit_flag = False
-
 
     def create_classes(self):
         """ 创建班级视图方法
