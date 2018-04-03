@@ -44,8 +44,8 @@ class Schools(object):
         else:
             return self.storage.quary(name)
 
-    def set_info(self, name, value):
-        self.storage.nonquary(name, value)
+    # def set_info(self, name, value):
+    #     self.storage.nonquary(name, value)
 
     def __check_name(self, name):
         """ 检查方法

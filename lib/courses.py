@@ -52,8 +52,8 @@ class Courses(object):
             print('\033[031;1m%s\033[0m'% e)
             return False
 
-    def getter(self):
-        return self
+    # def getter(self):
+    #     return self
 
 if __name__ == '__main__':
     test = Courses()

@@ -4,13 +4,13 @@ from lib import db
 from conf import settings
 import hashlib
 import os
-from lib import persion
+from lib.persion import *
 
 
 class Accounts(object):
     """ 账号父类 """
     storage = db.inter_db_handler(settings.ACCOUNT_DATABASE)
-    human = persion.Teacher()
+    human = Persion()
 
     def __init__(self):
         self.id = None
@@ -19,6 +19,7 @@ class Accounts(object):
         self.account_type = None
         self.status = None
         self.user_info = None
+
 
     def getter(self, username, password):
         """ 获取账号
@@ -103,15 +104,62 @@ class Accounts(object):
         return account_data
 
 
-class StudentAccounts(Accounts):
+class TeacherAccounts(Accounts):
+    # storage = db.inter_db_handler(settings.TEACHER_ACCOUNT_DATABASE)
 
     def __init__(self):
-        pass
+        super(TeacherAccounts, self).__init__()
+
+    def getter(self, username, password):
+        """ 获取管理员账号
+
+        :param username:
+        :param password:
+        :return:
+        """
+        result = super(TeacherAccounts, self).getter(username, password)
+        if result:
+            return result
+        else:
+            return False
+
+
+    def setter(self, username, password, account_type, status):
+        """ 创建管理员账号
+
+        :return:
+        """
+        # print(username, password)
+        super(TeacherAccounts, self).setter(username, password, account_type, status)
+
+    def __check_username(self):
+        """ 检查账号的用户名是否存在数据库
+
+        :param username:
+        :return:
+        """
+        if not os.path.exists('%s/%s' % (self.storage.db_path, self.id)):
+            return True
+        else:
+            return False
+
+class StudentAccounts(Accounts):
+    human = Student()
+    def __init__(self):
+        super(StudentAccounts, self).__init__()
+        self.student_data = []
+        self.study_record = []
+
+    def set_student_data(self, account_data, value):
+        self.student_data = value
+        print(account_data)
+        return self
+
 
 
 class AdminAccounts(Accounts):
 
-    storage = db.inter_db_handler(settings.ADMIN_ACCOUNT_DATABASE)
+    # storage = db.inter_db_handler(settings.ADMIN_ACCOUNT_DATABASE)
 
     def __init__(self):
         super(AdminAccounts, self).__init__()
@@ -130,7 +178,7 @@ class AdminAccounts(Accounts):
             return False
 
 
-    def setter(self, username=settings.DEFAULT_ADMIN_ACCOUNT, password=settings.DEFAULT_ADMIN_PASSWORD, account_type=0, status=0):
+    def setter(self, username=settings.DEFAULT_ADMIN_ACCOUNT, password=settings.DEFAULT_ADMIN_PASSWORD, account_type=1, status=0):
         """ 创建管理员账号
 
         :return:

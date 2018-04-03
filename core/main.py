@@ -82,17 +82,17 @@ def student_homepage(obj=student_view):
 def teacher_homepage(obj=teacher_view):
 
     menu = '''
-===============欢迎进入学员视图===============
-               1. 注册账号
-               2. 补充个人信息
-               3. 查看账户信息
-               4. 选择课程
+===============欢迎进入教师视图===============
+               1. 填写账户信息
+               2. 查看账户信息
+               3. 选择课程
+               4. 注销
 ==============================================
     '''
-    menu_dict = {'1': 'register(obj)',
-                 '2': 'set(obj)',
-                 '3': 'tell(obj)',
-                 '4': 'choice_pay(obj)'}
+    menu_dict = {'1': 'set_information(obj)',
+                 '2': 'tell_information(obj)',
+                 '3': 'choice_pay(obj)',
+                 '4': 'sign_out(obj)'}
     # menu_dict = {'1': 'operators.register(obj)',
     #              '2':  'operators.set(obj)',
     #              '3': 'operators.tell(obj)',
@@ -108,9 +108,8 @@ def admin_homepage(obj=admin_view):
                2. 创建课程
                3. 创建班级
                4. 创建讲师
-               5. 创建学员
-               6. 修改密码
-               7. 注销
+               5. 修改密码
+               6. 注销
 ==============================================
         '''
     # menu_dict = {'1': 'operators.create_school(obj)',
@@ -124,9 +123,8 @@ def admin_homepage(obj=admin_view):
                  '2': 'create_courses(obj)',
                  '3': 'create_classes(obj)',
                  '4': 'create_teachers(obj)',
-                 '5': 'create_students(obj)',
-                 '6': 'change_password(obj)',
-                 '7': 'sign_out(obj)'}
+                 '5': 'change_password(obj)',
+                 '6': 'sign_out(obj)'}
     interactive(menu, menu_dict, obj, flag=True)
 
 
@@ -137,8 +135,16 @@ def login(func):
     :return:
     """
     def inner(*args, **kwargs):
-        if args[0].login():
-            func(*args, **kwargs)
+        """ 这段有重复的if语句需要解决"""
+        if isinstance(args[0],views.StudentView):
+            if args[0].login(3):
+                func(*args, **kwargs)
+        elif isinstance(args[0],views.TeacherView):
+            if args[0].login(2):
+                func(*args, **kwargs)
+        elif isinstance(args[0],views.AdminView):
+            if args[0].login(account_type=1):
+                func(*args, **kwargs)
     return inner
 
 
@@ -148,7 +154,7 @@ def sign_up(obj):
     :param obj: 传入需要的视图对象
     :return:
     """
-    obj.register()
+    obj.register(3,0)
 
 
 @login
@@ -246,17 +252,15 @@ def create_classes(obj):
     :param obj: 传入需要的视图对象
     :return:
     """
-    obj.create_school()
+    obj.create_classes()
 
 
 @login
 def create_teachers(obj):
-    pass
+    obj.create_teachers(2,0)
 
 
-@login
-def create_students(obj):
-    pass
+
 
 
 def run():
