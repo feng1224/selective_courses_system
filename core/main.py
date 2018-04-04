@@ -14,6 +14,26 @@ teacher_view = views.TeacherView()
 admin_view = views.AdminView()
 
 
+def login(func):
+    """ 登录函数
+
+    :param func:
+    :return:
+    """
+    def inner(*args, **kwargs):
+        """ 这段有重复的if语句需要解决"""
+        if isinstance(args[0],views.StudentView):
+            if args[0].login(3):
+                func(*args, **kwargs)
+        elif isinstance(args[0],views.TeacherView):
+            if args[0].login(2):
+                func(*args, **kwargs)
+        elif isinstance(args[0],views.AdminView):
+            if args[0].login(account_type=1):
+                func(*args, **kwargs)
+    return inner
+
+
 def interactive(menu, menu_dict, obj, flag):
     """ 主菜单接口。
         用户首先登录主菜单，选择进入具体的通道。
@@ -36,10 +56,12 @@ def homepage(obj=None):
     while True:
         menu = '''
 ===============欢迎进入老男孩学校===============
+
                 1. 学生登录通道
                 2. 教师登录通道
                 3. 管理员登录通道
                 4. 退出
+                
 ================================================
         '''
         menu_dict = {'1': 'student_homepage()',
@@ -53,6 +75,7 @@ def student_homepage(obj=student_view):
 
     menu = '''
 ===============欢迎进入学员视图===============
+
                1. 注册账号
                2. 填写账户信息
                3. 查看账户信息
@@ -60,6 +83,7 @@ def student_homepage(obj=student_view):
                5. 查看学习记录
                6. 修改密码
                7. 注销
+               
 ==============================================
     '''
     menu_dict = {'1': 'sign_up(obj)',
@@ -83,10 +107,12 @@ def teacher_homepage(obj=teacher_view):
 
     menu = '''
 ===============欢迎进入教师视图===============
+
                1. 填写账户信息
                2. 查看账户信息
                3. 选择课程
                4. 注销
+               
 ==============================================
     '''
     menu_dict = {'1': 'set_information(obj)',
@@ -102,14 +128,38 @@ def teacher_homepage(obj=teacher_view):
 
 def admin_homepage(obj=admin_view):
     menu = '''
-===============欢迎进入学员视图===============
+===============欢迎进入管理视图===============
+
+               1. 学校管理
+               2. 学员管理
+               3. 注销
+               
+==============================================
+        '''
+    # menu_dict = {'1': 'operators.create_school(obj)',
+    #              '2': 'operators.create_courses(obj)',
+    #              '3': 'operators.create_classes(obj)',
+    #              '4': 'operators.create_teachers(obj)',
+    #              '5': 'operators.create_students(obj)',
+    #              '6': 'operators.change_password(obj)',
+    #              '7': 'operators.sign_out(obj)'}
+    menu_dict = {'1': 'school_admin_page(obj)',
+                 '2': 'account_admin_page(obj)',
+                 '3': 'sign_out(obj)'}
+    interactive(menu, menu_dict, obj, flag=True)
+
+
+@login
+def school_admin_page(obj=admin_view):
+    menu = '''
+===============欢迎进入管理视图===============
 
                1. 创建学校
                2. 创建课程
-               3. 创建班级
-               4. 创建讲师
-               5. 修改密码
-               6. 注销
+               3. 创建讲师
+               4. 创建班级
+               5. 返回
+               
 ==============================================
         '''
     # menu_dict = {'1': 'operators.create_school(obj)',
@@ -121,31 +171,36 @@ def admin_homepage(obj=admin_view):
     #              '7': 'operators.sign_out(obj)'}
     menu_dict = {'1': 'create_school(obj)',
                  '2': 'create_courses(obj)',
-                 '3': 'create_classes(obj)',
-                 '4': 'create_teachers(obj)',
-                 '5': 'change_password(obj)',
-                 '6': 'sign_out(obj)'}
+                 '3': 'create_teachers(obj)',
+                 '4': 'create_classes(obj)',
+                 '5': 'sign_out(obj, admin_homepage)'}
     interactive(menu, menu_dict, obj, flag=True)
 
 
-def login(func):
-    """ 登录函数
+@login
+def account_admin_page(obj=admin_view):
+    menu = '''
+===============欢迎进入管理视图===============
 
-    :param func:
-    :return:
-    """
-    def inner(*args, **kwargs):
-        """ 这段有重复的if语句需要解决"""
-        if isinstance(args[0],views.StudentView):
-            if args[0].login(3):
-                func(*args, **kwargs)
-        elif isinstance(args[0],views.TeacherView):
-            if args[0].login(2):
-                func(*args, **kwargs)
-        elif isinstance(args[0],views.AdminView):
-            if args[0].login(account_type=1):
-                func(*args, **kwargs)
-    return inner
+               1. 学员信息
+               2. 分配班级
+               3. 修改密码
+               4. 返回
+               
+==============================================
+        '''
+    # menu_dict = {'1': 'operators.create_school(obj)',
+    #              '2': 'operators.create_courses(obj)',
+    #              '3': 'operators.create_classes(obj)',
+    #              '4': 'operators.create_teachers(obj)',
+    #              '5': 'operators.create_students(obj)',
+    #              '6': 'operators.change_password(obj)',
+    #              '7': 'operators.sign_out(obj)'}
+    menu_dict = {'1': 'tell_student(obj)',
+                 '2': 'assign_class(obj)',
+                 '3': 'change_password(obj)',
+                 '4': 'sign_out(obj, admin_homepage)'}
+    interactive(menu, menu_dict, obj, flag=True)
 
 
 def sign_up(obj):
@@ -207,14 +262,14 @@ def tell_record(obj):
     pass
 
 
-def sign_out(obj):
+def sign_out(obj, page=homepage):
     """ 注销函数
 
     :param obj: 传入需要的视图对象
     :return:
     """
     obj.logout()
-    homepage()
+    page()
 
 
 def exit_system():
@@ -260,7 +315,9 @@ def create_teachers(obj):
     obj.create_teachers(2,0)
 
 
-
+@login
+def tell_student(obj):
+    obj.tell_student()
 
 
 def run():

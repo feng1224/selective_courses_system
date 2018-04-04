@@ -12,24 +12,18 @@ class View(object):
 
     account = Accounts()  # 关联Accounts对象，后续的登录，注册都需要使用
     school = Schools()
-    course = Courses()
-    classes = Classes()
     account_storage = inter_db_handler(settings.ACCOUNT_DATABASE)
     base_storage = inter_db_handler(settings.BASE_DATABASE)
-    user_data = {
-        'account_id': None,
-        'is_authenticated': False,
-        'account_data': None}
-    # school_data = {'school': None,
-    #                'course': [],
-    #                'class': [],
-    #                'teacher': [],
-    #                'student': []}
+    user_data = {'account_id': None,
+                 'is_authenticated': False,
+                 'account_data': None,
+                 }
     base_data = {'school': None,
-                   'course': {},
-                   'class': {},
-                   'teacher': {},
-                   'student': {}}
+                 'course': {},
+                 'class': {},
+                 'teacher': {},
+                 'student': {}
+                 }
 
     def __init__(self):
         self.menu = None
@@ -47,14 +41,10 @@ class View(object):
             if not self.user_data['is_authenticated']:
                 username = input('Please input username:').strip()
                 password = input('Please input password:').strip()
-                obj = self.account.getter(username, password)
-                # print(obj.__dict__)
-                # print(obj.account_type, account_type)
-                if obj and obj.account_type == account_type:  # 判断账户的类型与账户是否存在
+                account_obj = self.account.getter(username, password)
+                if account_obj and account_obj['account_data'].account_type == account_type:  # 判断账户的类型与账户是否存在
                     print('\033[34;1mLogin Success！\033[0m')
-                    self.user_data['account_id'] = obj.id
-                    self.user_data['is_authenticated'] = True
-                    self.user_data['account_data'] = obj
+                    self.user_data = account_obj
                     return self.user_data
                 else:
                     print('\033[31;1mUsername or Password error！\033[0m')
@@ -72,6 +62,7 @@ class View(object):
             username = input('Please input username:').strip()
             password = input('Please input password:').strip()
             re_password = input('Please input password confirmation:').strip()
+            account_obj = self.account.setter(username, password, account_type, account_status)
             """下面代码，判断用户名是否等于密码。如果等于的话会报错。坦诚说,
             是因为注册账号时的account_id是用用户名的MD5算出来的，如果密码和用户名一样，账号的ID就和密码的MD5一样.
             所以添加这行代码,不让用户名和密码一样。其实也是一种伪装自己bug的方法（笑哭脸）。后续会改进"""
@@ -84,20 +75,19 @@ class View(object):
             elif password != re_password:
                 print('\033[31;1mError:Password do not match!\033[0m')
                 continue
+            elif not account_obj:
+                print('\033[31;1mThe user has already existed!\033[0m')
             else:
                 # 注册新账号
-                obj = self.account.setter(username, password, account_type, account_status)
-                if obj:
-                    print('\033[34;1mRegistry Success！\033[0m')
-                    print('\033[34;1m"%s" account login！\033[0m' % username)
-                    self.user_data['account_id'] = obj.id
-                    self.user_data['is_authenticated'] = True
-                    self.user_data['account_data'] = obj
-                    print(obj.__dict__)
-                    exit_flag = False
-                else:
-                    print('\033[31;1mThe user has already existed!\033[0m')
-                    continue
+                print('\033[34;1mRegistry Success！\033[0m')
+                print('\033[34;1m"%s" account login！\033[0m' % username)
+                self.user_data['account_id'] = account_obj.id
+                self.user_data['is_authenticated'] = True
+                self.user_data['account_data'] = account_obj
+                self.account_storage.nonquary(account_obj.id, self.user_data)
+                exit_flag = False
+                # 调试代码
+                # print(self.user_data)
 
     def tell_info(self):
         """ 展示账户信息方法
@@ -105,10 +95,8 @@ class View(object):
 
         :return:
         """
-        # print(self.user_data)
         user_data_obj = self.user_data['account_data']
         user_info_data = user_data_obj.user_info
-        # print(user_info_data)
         # 通过反射，判断user_info_data对象中是否想相应的属性。如有就赋值。如没有设置为Null
         if hasattr(user_info_data, 'name'):
             name = getattr(user_info_data, 'name')
@@ -143,19 +131,20 @@ class View(object):
         """ 设置个人信息
         :return:
         """
-
-        # 有个bug当设置用户详细信息时，可能会发生none的问题。现象重现：在学员界面，选择2，登录后在设置后会发生type和status = None
         exit_flag = True
         while exit_flag:
             fullname = input('Please input your fullname:').strip()
             sex = input('Please input your sex:').strip()
             age = input('Please input your age:').strip()
-
-            obj = self.account.set_info(self.user_data['account_data'], fullname, sex, age)
-            if obj:
-                self.user_data['account_data'] = obj
+            account_obj = self.account.set_info(self.user_data['account_data'], fullname, sex, age)
+            if account_obj:
+                self.user_data['account_data'] = account_obj
+                self.account_storage.nonquary(self.user_data['account_id'],self.user_data)
                 print('\033[34;1mSet Success！\033[0m')
                 exit_flag = False
+                # 调试代码
+                # print(self.user_data)
+                # print(self.user_data['account_data'].__dict__)
 
     def change_password(self):
         # print(self.user_data['account_data'])
@@ -185,22 +174,32 @@ class View(object):
             'is_authenticated': False,
             'account_data': None}
         print('\033[34;1m Account logout!\033[0m')
-        print(self.user_data)
+        # 调试代码
+        # print(self.user_data)
 
 
 class StudentView(View):
     """ 学生视图 """
     account = StudentAccounts()
-    user_data = {
-        'account_id': None,
-        'is_authenticated': False,
-        'account_data': None}
+    user_data = {'account_id': None,
+                 'is_authenticated': False,
+                 'account_data': None,
+                 'student_data': {'school': None, 'course': []},
+                 'study_record': None
+                 }
 
     def __init__(self):
         super(StudentView, self).__init__()
 
     def register(self, account_type, account_status):
+        """ 支持视图
+
+        :param account_type:
+        :param account_status:
+        :return:
+        """
         print('================创建学生=================')
+        # 重用父类的注册账号代码
         super(StudentView, self).register(account_type, account_status)
 
     def choise_courses(self):
@@ -211,34 +210,44 @@ class StudentView(View):
         print('================购买课程=================')
         exit_flag = True
         while exit_flag:
-            print('Please Input school and course. Input format like "beijing.python"')
-            course_seq = input('>>:').strip()
-            if not course_seq:
-                print('\033[031;1mError: Input cannot be null!\033[0m')
-            elif not '.' in course_seq:
-                print('\033[031;1mError: Input format error!\033[0m')
+            school_name = input('Please choise school:').strip()
+            course_name = input('Please choise course:').strip()
+            school_result = self.school.getter(school_name)
+            if not school_name or not course_name:
+                print('\033[031;1mError：Input cannot null!\033[0m')
+                exit_flag = False
+            elif not school_result:
+                print('\033[031;1mSchool does not exist\033[0m')
+                exit_flag = False
+            elif not course_name in school_result['course']:
+                print('\033[031;1mCourse does not exist\033[0m')
+                exit_flag = False
+            elif course_name in self.user_data['student_data']['course']:
+                print('\033[031;1mThe course has been purchased\033[0m')
+                exit_flag = False
             else:
-                school_name, course_name = course_seq.split('.')
-                print(school_name, course_name)
-                school_result = self.school.getter(school_name)
+                course_price = school_result['course'][course_name].price
+                if self.payment(course_price):
+                    account_name = self.user_data['account_data'].username
+                    school_result['course'][course_name].students.append(account_name)
+                    school_result['student'][account_name] = self.user_data
+                    self.base_storage.nonquary(school_name, school_result)
+                    self.user_data['student_data']['school'] = school_name
+                    self.user_data['student_data']['course'].append(course_name)
+                    self.account_storage.nonquary(self.user_data['account_id'], self.user_data)
+                    print('\033[034;1mThe success of the course purchase!\033[0m ')
+                    exit_flag = False
+                else:
+                    print('\033[031;1mError:Failure of course purchase!\033[0m')
+                # 调试代码
+                # print(self.user_data)
 
-                # # if school_result:
-                # #     for course_obj in school_result['course']:
-                # #         if course_obj.name == course_name:
-                # #             if self.payment(course_obj.price):
-                # #                 obj = self.account.set_student_data(self.user_data['account_data'], )
-                # #                 if obj:
-                # #                     self.user_data['account_data'] = obj
-                # #                     print('\033[34;1mSet Success！\033[0m')
-                # #                     exit_flag = False
-                #
-                #
-                #         else:
-                #             print('\033[031;1mError: The course does not exist!\033[0m')
-                # else:
-                #     print('\033[031;1mError: The school does not exist!\033[0m')
-            # obj = self.
-            exit_flag = False
+    def tell_study_record(self):
+        """ 查看学习记录视图方法
+
+        :return:
+        """
+        pass
 
     def payment(self, pay):
         """ 付款视图方法
@@ -252,7 +261,7 @@ class StudentView(View):
             if not tuition:
                 print('\033[031;1mError:Tuition cannot be null!\033[0m')
             else:
-                if tuition == pay:
+                if int(tuition) == pay:
                     return True
                 else:
                     return False
@@ -271,17 +280,23 @@ class TeacherView(View):
 
 class AdminView(View):
     """ 管理员视图 """
-
-    user_data = {
-        'account_id': None,
-        'is_authenticated': False,
-        'account_data': None}
     account = Accounts()
     account.setter(username=settings.DEFAULT_ADMIN_ACCOUNT,
                    password=settings.DEFAULT_ADMIN_PASSWORD, account_type=1, status=0)
+    user_data = {
+        'account_id': account.id,
+        'is_authenticated': False,
+        'account_data': account}
+
+    account_storage = inter_db_handler(settings.ACCOUNT_DATABASE)
+    account_storage.nonquary(account.id, user_data)
+
 
     def __init__(self):
         super(AdminView, self).__init__()
+
+    # def login(self, account_type):
+    #     super(AdminView, self).login(account_type)
 
     def create_school(self):
         """ 管理员创建学校视图方法
@@ -294,18 +309,18 @@ class AdminView(View):
             name = input('Please input name of school:').strip()
             city = input('Please input city of school:').strip()
             location = input('Please input address of school:').strip()
-            if not name or not city:
+            school_result = self.school.setter(name, city, location)
+            if not name or not city or not location:
                 print('\033[031;1m Error: Cannot be null!')
+                exit_flag = False
+            elif not school_result:
+                print('\033[031;1mSchool has already existed!\033[0m')
+                exit_flag = False
             else:
-                obj = self.school.setter(name, city, location)
-                if obj:
-                    self.base_data['school'] = obj
-                    self.base_storage.nonquary(name, self.base_data)
-                    print('\033[034;1mCreate school success!\033[0m')
-                    exit_flag = False
-                else:
-                    print('\033[031;1mSchool has already existed!\033[0m')
-                    exit_flag = False
+                self.base_data['school'] = school_result
+                self.base_storage.nonquary(name, self.base_data)
+                print('\033[034;1mCreate school success!\033[0m')
+                exit_flag = False
 
     def create_courses(self):
         """ 管理员创建课程视图方法
@@ -320,46 +335,32 @@ class AdminView(View):
             period = input('Please input term:')
             school_name = input('Please input associated school:')
             school_result = self.school.getter(school_name)
+            # print(school_result)
             if not course_name or not price or not period or not school_name:
                 print('\033[031;1m Cannot be null!\033[0m')
+                exit_flag = False
             elif not price.isdigit() or not period.isdigit():
                 print('\033[031;1m Price and Period must be integer!\033[0m')
+                exit_flag = False
             elif not school_result:
                 print('\033[031;1mSchool does not exist\033[0m')
+                exit_flag = False
             elif course_name in school_result['course']:
                 print('\033[031;1mCourse has already existed!\033[0m')
+                exit_flag = False
             else:
-                # print(school_result)
-                obj = self.course.setter(course_name, int(price), int(period))
-                if obj:
-                    school_result['course'][course_name] = obj
-                    print(school_result)
+                course_obj = Courses(course_name, int(price), int(period))
+                if course_obj:
+                    school_result['course'][course_name] = course_obj
                     self.base_storage.nonquary(school_name, school_result)
                     print('\033[034;1mCreate course success!\033[0m')
                     exit_flag = False
+                    # 调试内容
+                    print(course_obj.__dict__)
+                    print(school_result)
                 else:
                     print('\033[031;1mCreate course failed!\033[0m')
                     exit_flag = False
-                # print(school_result)
-                # if school_result['course'] == []:
-                #     obj = self.course.setter(course_name, int(price), int(period))
-                #     school_result['course'].append(obj)
-                #     self.school.set_info(school_name, school_result)
-                #     print('\033[034;1mCreate course success!\033[0m')
-                #     exit_flag = False
-                # else:
-                #     course_name_list = []
-                #     for course_obj in school_result['course']:
-                #         course_name_list.append(course_obj.name)
-                #     if course_name in course_name_list:
-                #         print('\033[031;1mCourse has already existed!\033[0m')
-                #         exit_flag = False
-                #     else:
-                #         obj = self.course.setter(course_name, int(price), int(period))
-                #         school_result['course'].append(obj)
-                #         self.school.set_info(school_name, school_result)
-                #         print('\033[034;1mCreate course success!\033[0m')
-                #         exit_flag = False
 
     def create_classes(self):
         """ 创建班级视图方法
@@ -370,47 +371,34 @@ class AdminView(View):
         exit_flag = True
         while exit_flag:
             class_name = input('Please input class name:').strip()
-            course = input('Please input associated course:').strip()
-            teacher = input('Please input associated teacher:').strip()
             school_name = input('Please input associated school:').strip()
+            course_name = input('Please input associated course:').strip()
+            teacher_name = input('Please input associated teacher:').strip()
+
             school_result = self.school.getter(school_name)
-            # print(school_result)
-            course_list = school_result['course']
-            teacher_list = school_result['teacher']
-            if not course or not class_name or not course or not teacher or not school_name:
+            if not class_name or not course_name or not school_name:
                 print('\033[031;1m Cannot be null!\033[0m')
-            if not school_result:
-                print('\033[031;1m School designation error!\033[0m')
                 exit_flag = False
-
-            course_result = None
-            for course_obj in course_list:
-                if course_obj.name == course:
-                    course_result = course_obj
-                else:
-                    course_result = None
-
-            teacher_result = None
-            for teacher_obj in teacher_list:
-                # print(teacher_obj.__dict__)
-                if teacher_obj.username == teacher:
-                    teacher_result = teacher_obj
-                else:
-                    teacher_result = None
-
-            if not course_result or not teacher_result:
-                print('\033[031;1mError: Course or Teacher designation error!\033[0m')
+            elif not school_result:
+                print('\033[031;1mSchool does not exist\033[0m')
+                exit_flag = False
+            elif not course_name in school_result['course']:
+                print('\033[031;1mCourse does not exist\033[0m')
+                exit_flag = False
+            elif not teacher_name in school_result['teacher']:
+                print('\033[031;1mTeacher does not exist\033[0m')
                 exit_flag = False
             else:
-                obj = self.classes.setter(class_name, course_result, teacher_result)
-                if obj:
-                    school_result['class'].append(obj)
-                    print(school_result)
-                    self.school.set_info(school_name, school_result)
-                    print('\033[034;1mCreate class success！\033[0m')
-                    exit_flag = False
-                else:
-                    print('\033[031;1mError: Create class failed!\033[0m')
+                course_obj = school_result['course'][course_name]
+                course_obj.classes.append(class_name)  # 在课程对象中添加班级的名称
+                classes_obj = Classes(class_name, teacher=teacher_name)  # 创建班级对象
+                school_result['class'][class_name] = classes_obj
+                self.base_storage.nonquary(school_name, school_result)
+                print('\033[034;1mCreate class success!\033[0m')
+                exit_flag = False
+                # 调试代码
+                print(school_result)
+                print(school_result['course'][course_name].__dict__)
 
     def create_teachers(self, account_type, account_status):
         """ 创建老师视图方法
@@ -426,30 +414,38 @@ class AdminView(View):
             password = input('Please input password:').strip()
             re_password = input('Please input password confirmation:').strip()
             school_name = input('Please input associated school:').strip()
+            school_result = self.school.getter(school_name)
+            account_obj = self.account.setter(username, password, account_type, account_status)
             """下面代码，判断用户名是否等于密码。如果等于的话会报错。坦诚说,
             是因为注册账号时的account_id是用用户名的MD5算出来的，如果密码和用户名一样，账号的ID就和密码的MD5一样.
             所以添加这行代码,不让用户名和密码一样。其实也是一种伪装自己bug的方法（笑哭脸）。后续会改进"""
             if not username or not password:
                 print('\033[31;1mError:Username or Password cannot be null!\033[0m')
-                continue
+                exit_flag = False
+            elif not school_result:
+                print('\033[031;1mSchool does not exist\033[0m')
+                exit_flag = False
             elif username == password:
                 print('\033[31;1mError:Username Cannot be equal to Password !\033[0m')
-                continue
+                exit_flag = False
             elif password != re_password:
                 print('\033[31;1mError:Password do not match!\033[0m')
-                continue
+                exit_flag = False
+            elif not account_obj:
+                print('\033[31;1mThe user has already existed!\033[0m')
+                exit_flag = False
             else:
-                school_result = self.school.getter(school_name)
-                if school_result:
-                    # 注册新账号
-                    obj = self.account.setter(username, password, account_type, account_status)
-                    if obj:
-                        school_result['teacher'].append(obj)
-                        self.school.set_info(school_name, school_result)
-                        print('\033[34;1mRegistry Success！\033[0m')
-                        exit_flag = False
-                    else:
-                        print('\033[31;1mThe user has already existed!\033[0m')
-                        continue
-                else:
-                    print('\033[031;1m School designation error!\033[0m')
+                # 创建新老师账号
+                school_result['teacher'][username] = account_obj
+                self.base_storage.nonquary(school_name, school_result)
+                print('\033[34;1mRegistry Success！\033[0m')
+                exit_flag = False
+                # 调试代码
+                print(school_result)
+
+    def tell_student(self):
+        exit_flag = True
+        while exit_flag:
+            school_name = input('Please input school:').strip()
+            if not school_name:
+                print('haha')

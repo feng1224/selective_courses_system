@@ -1,22 +1,27 @@
-class test(object):
+class Accounts(object):
+    """ 账号父类 """
 
-    def __init__(self):
-        self.__name = None
-        self.__age = None
+    def __init__(self, username, password):
+        self.username = username
+        self.__password = self.generate_md5(self.check_password(password))
 
     @property
-    def set(self):
-        return self.__name, self.__age
+    def password(self):
+        return self.__password
 
-    @set.setter
-    def set(self, kwargs):
-        print(kwargs)
-        self.__name = kwargs['name']
-        self.__age = kwargs['age']
+    def set_password(self, value):
+        print(value)
+        print(self.generate_md5(value))
+        self.__password = self.generate_md5(value)
+
+    @staticmethod
+    def check_password(value):
+        return value
+
+    @staticmethod
+    def generate_md5(value):
+        return value + '123'
 
 if __name__ == '__main__':
-    test1 = test()
-    #print(test1.__dict__)
-    test1.set = {'name': 'jem', 'age': 19}
-    #print(test1.__dict__)
-    print(test1.set)
+    test = Accounts('henry', '123')
+    print(test.__dict__)

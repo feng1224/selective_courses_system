@@ -12,13 +12,25 @@ class Accounts(object):
     storage = db.inter_db_handler(settings.ACCOUNT_DATABASE)
     human = Persion()
 
-    def __init__(self):
-        self.id = None
-        self.username = None
-        self.password = None
-        self.account_type = None
-        self.status = None
-        self.user_info = None
+    def __init__(self, username, password, account_type, account_status, user_info_obj = None):
+        self.id = self.generate_md5(username)
+        self.username = username
+        self.__password = self.generate_md5(self.check_password(password))
+        self.__account_type = account_type
+        self.__account_status = account_status
+        self.user_info_obj = user_info_obj
+
+    @property
+    def password(self):
+        return self.__password
+
+    @property
+    def account_type(self):
+        return self.__account_type
+
+    @staticmethod
+    def check_password(self, value):
+        return value
 
     def getter(self, username, password):
         """ 获取账号
@@ -56,13 +68,13 @@ class Accounts(object):
             return False
 
     @staticmethod
-    def create_hash(arg):
+    def generate_md5(value):
         """ hash创建方法
             使用用户名进行MD5校验计算出账号的ID和密码。
         :return:
         """
         md5_id = hashlib.md5()
-        md5_id.update(arg.encode('utf-8'))
+        md5_id.update(value.encode('utf-8'))
         return md5_id.hexdigest()
 
     def __check_username(self):
