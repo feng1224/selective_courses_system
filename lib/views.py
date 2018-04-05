@@ -184,7 +184,7 @@ class StudentView(View):
     user_data = {'account_id': None,
                  'is_authenticated': False,
                  'account_data': None,
-                 'student_data': {'school': None, 'course': []},
+                 'student_data': {'school': None, 'course': [], 'class': []},
                  'study_record': None
                  }
 
@@ -219,7 +219,7 @@ class StudentView(View):
             elif not school_result:
                 print('\033[031;1mSchool does not exist\033[0m')
                 exit_flag = False
-            elif not course_name in school_result['course']:
+            elif course_name not in school_result['course']:
                 print('\033[031;1mCourse does not exist\033[0m')
                 exit_flag = False
             elif course_name in self.user_data['student_data']['course']:
@@ -231,16 +231,17 @@ class StudentView(View):
                     account_name = self.user_data['account_data'].username
                     school_result['course'][course_name].students.append(account_name)
                     school_result['student'][account_name] = self.user_data
-                    self.base_storage.nonquary(school_name, school_result)
                     self.user_data['student_data']['school'] = school_name
                     self.user_data['student_data']['course'].append(course_name)
+                    self.base_storage.nonquary(school_name, school_result)
                     self.account_storage.nonquary(self.user_data['account_id'], self.user_data)
                     print('\033[034;1mThe success of the course purchase!\033[0m ')
                     exit_flag = False
                 else:
                     print('\033[031;1mError:Failure of course purchase!\033[0m')
                 # 调试代码
-                # print(self.user_data)
+                print(self.user_data)
+                print(school_result['course'][course_name].__dict__)
 
     def tell_study_record(self):
         """ 查看学习记录视图方法
@@ -399,6 +400,7 @@ class AdminView(View):
                 # 调试代码
                 print(school_result)
                 print(school_result['course'][course_name].__dict__)
+                print(school_result['class'][class_name].__dict__)
 
     def create_teachers(self, account_type, account_status):
         """ 创建老师视图方法
@@ -420,10 +422,10 @@ class AdminView(View):
             是因为注册账号时的account_id是用用户名的MD5算出来的，如果密码和用户名一样，账号的ID就和密码的MD5一样.
             所以添加这行代码,不让用户名和密码一样。其实也是一种伪装自己bug的方法（笑哭脸）。后续会改进"""
             if not username or not password:
-                print('\033[31;1mError:Username or Password cannot be null!\033[0m')
+                print('\033[31;1mError: Username or Password cannot be null!\033[0m')
                 exit_flag = False
             elif not school_result:
-                print('\033[031;1mSchool does not exist\033[0m')
+                print('\033[031;1mError: School does not exist\033[0m')
                 exit_flag = False
             elif username == password:
                 print('\033[31;1mError:Username Cannot be equal to Password !\033[0m')
@@ -447,5 +449,91 @@ class AdminView(View):
         exit_flag = True
         while exit_flag:
             school_name = input('Please input school:').strip()
+            school_result = self.school.getter(school_name)
             if not school_name:
-                print('haha')
+                print('\033[31;1mError: School cannot be null!\033[0m')
+                exit_flag = False
+            elif not school_result:
+                print('\033[031;1mError: School does not exist!\033[0m')
+                exit_flag = False
+            elif school_result:
+                students = school_result['student']
+            elif not students:
+                print('\033[034;1mStudents does not exist!\033[0m')
+                exit_flag = False
+            else:
+                for student_name in students:
+                    student_id = students[student_name]['account_id']
+                    account_data = students[student_name]['account_data']
+                    student_data = students[student_name]['student_data']
+                    info = '''
+==================学生信息==================
+
+         ID：         \033[34;1m%s\033[0m
+         Account：    \033[34;1m%s\033[0m
+         Type：       \033[34;1m%s\033[0m
+         Status:      \033[34;1m%s\033[0m
+         School:      \033[34;1m%s\033[0m
+         Course:      \033[34;1m%s\033[0m
+         Class:       \033[34;1m%s\033[0m
+         
+============================================
+                                    ''' % (student_id, student_name, account_data.account_type, account_data.status,
+                                           student_data['school'], student_data['course'], student_data['class'], )
+                    print(info)
+                exit_flag = False
+
+    def assign_class(self):
+        print('================分配班级=================')
+        exit_flag = True
+        while exit_flag:
+            school_name = input('Please input name of school:').strip()
+            student_name = input('Please input account of student:').strip()
+            course_name = input('Please input name of course:').strip()
+            class_name = input('Please input name of class:').strip()
+            school_result = self.school.getter(school_name)
+            if not school_name or not student_name or not class_name or not course_name:
+                print('\033[031;1mError: School or Student or Class or Course cannot be null!\033[0m')
+                exit_flag = False
+            elif not school_result:
+                print('\033[031;1mError: School does not exist!!\033[0m')
+                exit_flag = False
+            else:
+                school_student = school_result['student']
+                school_course = school_result['course']
+                school_class = school_result['class']
+                if student_name not in school_student:
+                    print('\033[031;1mError: Student does not exist!!\033[0m')
+                    exit_flag = False
+                else:
+                    student_data = school_student[student_name]
+                    if course_name not in school_course:
+                        print('\033[031;1mError: Course does not exist!!\033[0m')
+                        exit_flag = False
+                    elif class_name not in school_class:
+                        print('\033[031;1mError: Class does not exist!!\033[0m')
+                        exit_flag = False
+                    elif course_name not in student_data['student_data']['course']:
+                        print('\033[031;1mError: Student does not buy Course!!\033[0m')
+                        exit_flag = False
+                    elif class_name not in school_course[course_name].classes:
+                        print('\033[031;1mError: Course!!\033[0m')
+                        exit_flag = False
+                    else:
+                        # student_course = student_data['student_data']['course']
+                        # class_course =
+                        school_student[student_name]['student_data']['class'].append(class_name)
+                        self.account_storage.nonquary(school_student[student_name]['account_id'], school_student[student_name])
+                        print('\033[034;1mStudents have bound courses!\033[0m')
+                        exit_flag = False
+                        # 调试代码
+                        print(self.account_storage.quary(school_student[student_name]['account_id']))
+                        print(school_student[student_name])
+                        # print(school_course[course_name].__dict__)
+                        # print(school_result)
+                        # print(school_student)
+                        # print(student_data['student_data']['course'])
+                        # print(school_course[course_name].classes)
+        # print(school_result)
+        # print(school_result['school'])
+        # print(school_result['course']['python'])

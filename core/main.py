@@ -319,6 +319,9 @@ def create_teachers(obj):
 def tell_student(obj):
     obj.tell_student()
 
+@login
+def assign_class(obj):
+    obj.assign_class()
 
 def run():
     homepage()
