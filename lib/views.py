@@ -43,8 +43,9 @@ class View(object):
                 password = input('Please input password:').strip()
                 account_obj = self.account.getter(username, password)
                 if account_obj and account_obj['account_data'].account_type == account_type:  # 判断账户的类型与账户是否存在
-                    print('\033[34;1mLogin Success！\033[0m')
                     self.user_data = account_obj
+                    self.user_data['is_authenticated'] = True
+                    print('\033[34;1mLogin Success！\033[0m')
                     return self.user_data
                 else:
                     print('\033[31;1mUsername or Password error！\033[0m')
@@ -139,7 +140,7 @@ class View(object):
             account_obj = self.account.set_info(self.user_data['account_data'], fullname, sex, age)
             if account_obj:
                 self.user_data['account_data'] = account_obj
-                self.account_storage.nonquary(self.user_data['account_id'],self.user_data)
+                self.account_storage.nonquary(self.user_data['account_id'], self.user_data)
                 print('\033[34;1mSet Success！\033[0m')
                 exit_flag = False
                 # 调试代码
@@ -152,21 +153,20 @@ class View(object):
         while exit_flag:
             old_password = input('Please input your old password:').strip()
             new_password = input('Please input your new password:').strip()
-            re_new_password = input('Please input your new pasword confirmation:').strip()
-
-            obj = self.account.getter(self.user_data['account_data'].username, old_password)
-            # print(obj.__dict__)
-            if obj:
+            re_new_password = input('Please input your new password confirmation:').strip()
+            account_obj = self.account.getter(self.user_data['account_data'].username, old_password)
+            if account_obj:
                 if not new_password or not re_new_password:
                     print('\033[31;1mError:Password cannot be null!\033[0m')
                 elif new_password != re_new_password:
                     print('\033[31;1mError:Password do not match!\033[0m')
                 else:
-                    result = self.account.change_password(obj, new_password)
+                    result = self.account.change_password(account_obj, new_password)
                     if result:
+                        self.account_storage.nonquary(self.user_data['account_id'], result)
                         exit_flag = False
             else:
-                print('\033[31;1mError: Password error!\033[0m')
+                print('\033[31;1mError: Old password error!\033[0m')
 
     def logout(self):
         self.user_data = {
@@ -177,6 +177,10 @@ class View(object):
         # 调试代码
         # print(self.user_data)
 
+    @staticmethod
+    def back_off():
+        print('\033[34;1m Back off!\033[0m')
+
 
 class StudentView(View):
     """ 学生视图 """
@@ -184,7 +188,7 @@ class StudentView(View):
     user_data = {'account_id': None,
                  'is_authenticated': False,
                  'account_data': None,
-                 'student_data': {'school': None, 'course': [], 'class': []},
+                 'student_data': {'school': None, 'course': [], 'class': [], 'teacher': []},
                  'study_record': None
                  }
 
@@ -267,17 +271,84 @@ class StudentView(View):
                 else:
                     return False
 
+    def tell_record(self):
+        if not self.user_data['account_data'].study_record:
+            study_record = '成绩未公布'
+        else:
+            study_record = self.user_data['account_data'].study_record
+        info = '''
+================学习记录=================
+
+            Score:  \033[034;1m%s\033[0m
+
+=========================================
+        ''' % study_record
+        print(info)
+
 
 class TeacherView(View):
     """ 老师视图 """
     user_data = {
         'account_id': None,
         'is_authenticated': False,
-        'account_data': None}
+        'account_data': None,
+        'teacher_data': {'school': None, 'course': [], 'class': []}
+    }
 
     def __init__(self):
         super(TeacherView, self).__init__()
+        self.teach_class = None
 
+    def choice_class(self):
+        exit_flag = True
+        while exit_flag:
+            class_name = input('Please input name of class:').strip()
+            school_result = self.base_storage.quary(self.user_data['teacher_data']['school'])
+            print(self.user_data['account_data'].__dict__)
+            print(school_result)
+            print('teacher: ', school_result['teacher'][self.user_data['account_data'].username].__dict__)
+            for classes in school_result['class']:
+                if class_name != classes:
+                    print('\033[034;1mError: You input class error!\033[0m')
+                else:
+                    if school_result['class'][classes].teacher != self.user_data['account_data'].username:
+                        print('\033[031;1mError: You do not teach the class!\033[0m')
+                    else:
+                        self.teach_class = class_name
+                        print('\033[034;1mChoice class success!\033[0m')
+                        exit_flag = False
+                        break
+
+    def tell_students(self):
+        if not self.teach_class:
+            print('\033[031;1mError: Please choice class first!\033[0m')
+        else:
+            print('================班级学生列表=================')
+            print('Class: \033[034;1m%s\033[0m' % self.teach_class)
+            print('Students: ')
+            school_result = self.base_storage.quary(self.user_data['teacher_data']['school'])
+
+            for student in school_result['student']:
+                if self.teach_class in school_result['student'][student]['student_data']['class']:
+                    print('\033[034;1m%s\033[0m' % student)
+            print('=============================================')
+
+    def homework_correcting(self):
+        if not self.teach_class:
+            print('\033[031;1mError: Please choice class first!\033[0m')
+        else:
+            school_result = self.base_storage.quary(self.user_data['teacher_data']['school'])
+            print('================作业批改=================')
+            exit_flag = True
+            while exit_flag:
+                student_name = input('Please input name of student:').strip()
+                score = input('Please input score of student:').strip()
+                if not student_name or not score:
+                    print('\033[031;1mError: Student name or Student score cannot be null!\033[0m')
+                elif student_name not in school_result['student']:
+                    print('\033[031;1mError: %s is not your student!\033[0m' % student_name)
+                else:
+                    print(student_name, score)
 
 class AdminView(View):
     """ 管理员视图 """
@@ -292,12 +363,15 @@ class AdminView(View):
     account_storage = inter_db_handler(settings.ACCOUNT_DATABASE)
     account_storage.nonquary(account.id, user_data)
 
-
     def __init__(self):
         super(AdminView, self).__init__()
 
-    # def login(self, account_type):
-    #     super(AdminView, self).login(account_type)
+    def login(self, account_type):
+        account_result = super(AdminView, self).login(account_type)
+        if not account_result:
+            return False
+        else:
+            return account_result
 
     def create_school(self):
         """ 管理员创建学校视图方法
@@ -438,8 +512,13 @@ class AdminView(View):
                 exit_flag = False
             else:
                 # 创建新老师账号
+                TeacherView.user_data['account_id'] = account_obj.id
+                TeacherView.user_data['account_data'] = account_obj
+                TeacherView.user_data['teacher_data']['school'] = school_name
+                # print(TeacherView.user_data)
                 school_result['teacher'][username] = account_obj
                 self.base_storage.nonquary(school_name, school_result)
+                self.account_storage.nonquary(account_obj.id, TeacherView.user_data)
                 print('\033[34;1mRegistry Success！\033[0m')
                 exit_flag = False
                 # 调试代码
@@ -456,17 +535,28 @@ class AdminView(View):
             elif not school_result:
                 print('\033[031;1mError: School does not exist!\033[0m')
                 exit_flag = False
-            elif school_result:
-                students = school_result['student']
-            elif not students:
-                print('\033[034;1mStudents does not exist!\033[0m')
-                exit_flag = False
             else:
-                for student_name in students:
-                    student_id = students[student_name]['account_id']
-                    account_data = students[student_name]['account_data']
-                    student_data = students[student_name]['student_data']
-                    info = '''
+                students = school_result['student']
+                if not students:
+                    print('\033[034;1mStudents does not exist!\033[0m')
+                    exit_flag = False
+                else:
+                    for student_name in students:
+                        student_id = students[student_name]['account_id']
+                        account_data = students[student_name]['account_data']
+                        student_data = students[student_name]['student_data']
+                        account_type = account_data.account_type
+                        account_status = account_data.status
+                        account_school = student_data['school']
+                        account_course = ','.join(student_data['course'])
+                        print(student_data)
+                        account_class = ','.join(student_data['class'])
+                        if not account_class:
+                            account_class = "未分配班级"
+                        account_teacher = ','.join(student_data['teacher'])
+                        if not account_teacher:
+                            account_teacher = "未分配导师"
+                        info = '''
 ==================学生信息==================
 
          ID：         \033[34;1m%s\033[0m
@@ -476,12 +566,14 @@ class AdminView(View):
          School:      \033[34;1m%s\033[0m
          Course:      \033[34;1m%s\033[0m
          Class:       \033[34;1m%s\033[0m
+         Teacher:     \033[34;1m%s\033[0m
          
 ============================================
-                                    ''' % (student_id, student_name, account_data.account_type, account_data.status,
-                                           student_data['school'], student_data['course'], student_data['class'], )
-                    print(info)
-                exit_flag = False
+                                        ''' % (student_id, student_name, account_type, account_status,
+                                               account_school, account_course, account_class, account_teacher)
+                        print(info)
+                    exit_flag = False
+                    # 调试代码
 
     def assign_class(self):
         print('================分配班级=================')
@@ -523,17 +615,13 @@ class AdminView(View):
                         # student_course = student_data['student_data']['course']
                         # class_course =
                         school_student[student_name]['student_data']['class'].append(class_name)
+                        school_student[student_name]['student_data']['teacher'].append(school_class[class_name].teacher)
                         self.account_storage.nonquary(school_student[student_name]['account_id'], school_student[student_name])
+                        self.base_storage.nonquary(school_name, school_result)
                         print('\033[034;1mStudents have bound courses!\033[0m')
                         exit_flag = False
                         # 调试代码
                         print(self.account_storage.quary(school_student[student_name]['account_id']))
                         print(school_student[student_name])
-                        # print(school_course[course_name].__dict__)
-                        # print(school_result)
-                        # print(school_student)
-                        # print(student_data['student_data']['course'])
-                        # print(school_course[course_name].classes)
-        # print(school_result)
-        # print(school_result['school'])
-        # print(school_result['course']['python'])
+                        print(school_result)
+                        print(school_result['course'][course_name].__dict__)

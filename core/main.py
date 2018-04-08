@@ -2,7 +2,7 @@
 # Auther： Henry Yuan
 import sys
 from lib import views
-from . import operators
+
 
 user_data = {
     'account_id': None,
@@ -22,14 +22,14 @@ def login(func):
     """
     def inner(*args, **kwargs):
         """ 这段有重复的if语句需要解决"""
-        if isinstance(args[0],views.StudentView):
+        if isinstance(args[0], views.StudentView):
             if args[0].login(3):
                 func(*args, **kwargs)
-        elif isinstance(args[0],views.TeacherView):
+        elif isinstance(args[0], views.TeacherView):
             if args[0].login(2):
                 func(*args, **kwargs)
-        elif isinstance(args[0],views.AdminView):
-            if args[0].login(account_type=1):
+        elif isinstance(args[0], views.AdminView):
+            if args[0].login(1):
                 func(*args, **kwargs)
     return inner
 
@@ -45,9 +45,7 @@ def interactive(menu, menu_dict, obj, flag):
         print(menu)
         cmd = input('>>:').strip()
         if cmd in menu_dict:
-            result = eval(menu_dict[cmd])
-            # print(result)
-            #exit_flag = result
+            eval(menu_dict[cmd])
         else:
             print('选项不存在')
 
@@ -71,6 +69,7 @@ def homepage(obj=None):
         interactive(menu, menu_dict, obj, flag=True)
 
 
+# @login
 def student_homepage(obj=student_view):
 
     menu = '''
@@ -103,6 +102,7 @@ def student_homepage(obj=student_view):
     interactive(menu, menu_dict, obj, flag=True)
 
 
+# @login
 def teacher_homepage(obj=teacher_view):
 
     menu = '''
@@ -110,19 +110,41 @@ def teacher_homepage(obj=teacher_view):
 
                1. 填写账户信息
                2. 查看账户信息
-               3. 选择课程
+               3. 班级管理
                4. 注销
                
 ==============================================
     '''
     menu_dict = {'1': 'set_information(obj)',
                  '2': 'tell_information(obj)',
-                 '3': 'choice_pay(obj)',
+                 '3': 'class_manage(obj)',
                  '4': 'sign_out(obj)'}
-    # menu_dict = {'1': 'operators.register(obj)',
-    #              '2':  'operators.set(obj)',
-    #              '3': 'operators.tell(obj)',
-    #              '4': 'operators.choice_pay(obj)'}
+    interactive(menu, menu_dict, obj, flag=True)
+
+
+@login
+def class_manage(obj=teacher_view):
+    menu = '''
+===============欢迎进入管理视图===============
+
+               1. 选择班级
+               2. 学生列表
+               3. 批改作业
+               4. 返回
+
+==============================================
+            '''
+    # menu_dict = {'1': 'operators.create_school(obj)',
+    #              '2': 'operators.create_courses(obj)',
+    #              '3': 'operators.create_classes(obj)',
+    #              '4': 'operators.create_teachers(obj)',
+    #              '5': 'operators.create_students(obj)',
+    #              '6': 'operators.change_password(obj)',
+    #              '7': 'operators.sign_out(obj)'}
+    menu_dict = {'1': ' choice_class(obj)',
+                 '2': 'tell_students(obj)',
+                 '3': 'homework_correcting(obj)',
+                 '4': 'back_off(obj)'}
     interactive(menu, menu_dict, obj, flag=True)
 
 
@@ -132,7 +154,8 @@ def admin_homepage(obj=admin_view):
 
                1. 学校管理
                2. 学员管理
-               3. 注销
+               3. 修改密码
+               4. 注销
                
 ==============================================
         '''
@@ -145,7 +168,8 @@ def admin_homepage(obj=admin_view):
     #              '7': 'operators.sign_out(obj)'}
     menu_dict = {'1': 'school_admin_page(obj)',
                  '2': 'account_admin_page(obj)',
-                 '3': 'sign_out(obj)'}
+                 '3': 'change_password(obj)',
+                 '4': 'sign_out(obj)'}
     interactive(menu, menu_dict, obj, flag=True)
 
 
@@ -173,7 +197,7 @@ def school_admin_page(obj=admin_view):
                  '2': 'create_courses(obj)',
                  '3': 'create_teachers(obj)',
                  '4': 'create_classes(obj)',
-                 '5': 'sign_out(obj, admin_homepage)'}
+                 '5': 'back_off(obj, admin_homepage)'}
     interactive(menu, menu_dict, obj, flag=True)
 
 
@@ -184,8 +208,7 @@ def account_admin_page(obj=admin_view):
 
                1. 学员信息
                2. 分配班级
-               3. 修改密码
-               4. 返回
+               3. 返回
                
 ==============================================
         '''
@@ -198,8 +221,7 @@ def account_admin_page(obj=admin_view):
     #              '7': 'operators.sign_out(obj)'}
     menu_dict = {'1': 'tell_student(obj)',
                  '2': 'assign_class(obj)',
-                 '3': 'change_password(obj)',
-                 '4': 'sign_out(obj, admin_homepage)'}
+                 '3': 'back_off(obj, admin_homepage)'}
     interactive(menu, menu_dict, obj, flag=True)
 
 
@@ -209,7 +231,7 @@ def sign_up(obj):
     :param obj: 传入需要的视图对象
     :return:
     """
-    obj.register(3,0)
+    obj.register(3, 0)
 
 
 @login
@@ -259,7 +281,7 @@ def tell_record(obj):
     :param obj: 传入需要的视图对象
     :return:
     """
-    pass
+    obj.tell_record()
 
 
 def sign_out(obj, page=homepage):
@@ -272,6 +294,17 @@ def sign_out(obj, page=homepage):
     page()
 
 
+def back_off(obj, page):
+    """ 返回函数
+
+    :param obj: 传入需要的视图对象
+    :param page: 返回的页面属性
+    :return:
+    """
+    obj.back_off()
+    page()
+
+
 def exit_system():
     """ 退出系统函数
 
@@ -279,6 +312,7 @@ def exit_system():
     """
     print('\033[34;1m欢迎使用本系统，下次再见！\033[0m')
     sys.exit()
+
 
 @login
 def create_school(obj):
@@ -312,17 +346,38 @@ def create_classes(obj):
 
 @login
 def create_teachers(obj):
-    obj.create_teachers(2,0)
+    obj.create_teachers(2, 0)
 
 
 @login
 def tell_student(obj):
     obj.tell_student()
 
+
 @login
 def assign_class(obj):
     obj.assign_class()
 
+
+@login
+def start_teach(obj):
+    obj.start_teach()
+
+
+@login
+def tell_students(obj):
+    obj.tell_students()
+
+
+@login
+def homework_correcting(obj):
+    obj.homework_correcting()
+
+
+@login
+def choice_class(obj):
+    obj.choice_class()
+
+
 def run():
     homepage()
-

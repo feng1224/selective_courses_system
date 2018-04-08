@@ -5,6 +5,7 @@ from conf import settings
 import hashlib
 import os
 from lib.persion import *
+from lib.study_record import *
 
 
 class Accounts(object):
@@ -16,6 +17,7 @@ class Accounts(object):
         self.id = None
         self.username = None
         self.password = None
+        self.new_password = None
         self.account_type = None
         self.status = None
         self.user_info = None
@@ -94,9 +96,7 @@ class Accounts(object):
 
     def change_password(self, account_data, new_password):
         self.new_password = self.create_hash(new_password)
-        account_data.password = self.new_password
-        print(account_data.__dict__)
-        self.storage.nonquary(self.id, account_data)
+        account_data['account_data'].password = self.new_password
         return account_data
 
 
@@ -119,7 +119,6 @@ class TeacherAccounts(Accounts):
         else:
             return False
 
-
     def setter(self, username, password, account_type, status):
         """ 创建管理员账号
 
@@ -139,10 +138,17 @@ class TeacherAccounts(Accounts):
         else:
             return False
 
+
 class StudentAccounts(Accounts):
 
     def __init__(self):
         super(StudentAccounts, self).__init__()
+        self.study_record = None
+
+    def set_score(self, value):
+        study_record = StudyRecord()
+        study_record.score = value
+        self.study_record = study_record
 
 
 class AdminAccounts(Accounts):
