@@ -347,8 +347,11 @@ class TeacherView(View):
                     print('\033[031;1mError: Student name or Student score cannot be null!\033[0m')
                 elif student_name not in school_result['student']:
                     print('\033[031;1mError: %s is not your student!\033[0m' % student_name)
+                elif self.teach_class not in school_result['student'][student_name]['student_data']['class']:
+                    print('\033[031;1mError: %s is not your student!\033[0m' % student_name)
                 else:
                     print(student_name, score)
+
 
 class AdminView(View):
     """ 管理员视图 """
