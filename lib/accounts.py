@@ -188,17 +188,3 @@ class AdminAccounts(Accounts):
             return True
         else:
             return False
-
-
-if __name__ == '__main__':
-    import pickle
-    ac = Accounts()
-    ac.setter('1234','12345',1,2)
-
-    print(ac.__dict__)
-    ac.set_info('1234','12345',19)
-    print(ac.__dict__)
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    print(base_dir)
-    with open('%s/db/accounts/%s'% (base_dir,ac.id)) as f:
-        print(pickle.load(f.encoding('utf-8')))

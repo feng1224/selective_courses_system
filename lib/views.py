@@ -262,8 +262,8 @@ class StudentView(View):
                 else:
                     print('\033[031;1mError:Failure of course purchase!\033[0m')
                 # 调试代码
-                print(self.user_data)
-                print(school_result['course'][course_name].__dict__)
+                # print(self.user_data)
+                # print(school_result['course'][course_name].__dict__)
 
     def tell_study_record(self):
         """ 查看学习记录视图方法
@@ -518,9 +518,9 @@ class AdminView(View):
                 print('\033[034;1mCreate class success!\033[0m')
                 exit_flag = False
                 # 调试代码
-                print(school_result)
-                print(school_result['course'][course_name].__dict__)
-                print(school_result['class'][class_name].__dict__)
+                # print(school_result)
+                # print(school_result['course'][course_name].__dict__)
+                # print(school_result['class'][class_name].__dict__)
 
     def create_teachers(self, account_type, account_status):
         """ 创建老师视图方法
@@ -568,7 +568,7 @@ class AdminView(View):
                 print('\033[34;1mRegistry Success！\033[0m')
                 exit_flag = False
                 # 调试代码
-                print(school_result)
+                # print(school_result)
 
     def tell_student(self):
         """ 管理员查看学校中的学生视图方法
@@ -675,7 +675,7 @@ class AdminView(View):
                         print('\033[034;1mStudents have bound courses!\033[0m')
                         exit_flag = False
                         # 调试代码
-                        print(self.account_storage.quary(school_student[student_name]['account_id']))
-                        print(school_student[student_name])
-                        print(school_result)
-                        print(school_result['course'][course_name].__dict__)
+                        # print(self.account_storage.quary(school_student[student_name]['account_id']))
+                        # print(school_student[student_name])
+                        # print(school_result)
+                        # print(school_result['course'][course_name].__dict__)
