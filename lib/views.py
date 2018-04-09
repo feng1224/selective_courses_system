@@ -326,20 +326,18 @@ class TeacherView(View):
         while exit_flag:
             class_name = input('Please input name of class:').strip()
             school_result = self.base_storage.quary(self.user_data['teacher_data']['school'])
-            print(self.user_data['account_data'].__dict__)
-            print(school_result)
-            print('teacher: ', school_result['teacher'][self.user_data['account_data'].username].__dict__)
-            for classes in school_result['class']:
-                if class_name != classes:
-                    print('\033[034;1mError: You input class error!\033[0m')
+            # print(school_result['class'])
+            # for classes in school_result['class']:
+            if class_name not in school_result['class']:
+                print('\033[034;1mError: You input class error!\033[0m')
+            else:
+                if school_result['class'][class_name].teacher != self.user_data['account_data'].username:
+                    print('\033[031;1mError: You do not teach the class!\033[0m')
                 else:
-                    if school_result['class'][classes].teacher != self.user_data['account_data'].username:
-                        print('\033[031;1mError: You do not teach the class!\033[0m')
-                    else:
-                        self.teach_class = class_name
-                        print('\033[034;1mChoice class success!\033[0m')
-                        exit_flag = False
-                        break
+                    self.teach_class = class_name
+                    print('\033[034;1mChoice class success!\033[0m')
+                    exit_flag = False
+                    break
 
     def tell_students(self):
         """ 查看班级的学生视图方法
@@ -476,9 +474,9 @@ class AdminView(View):
                     self.base_storage.nonquary(school_name, school_result)
                     print('\033[034;1mCreate course success!\033[0m')
                     exit_flag = False
-                    # 调试内容
-                    print(course_obj.__dict__)
-                    print(school_result)
+                    # # 调试内容
+                    # print(course_obj.__dict__)
+                    # print(school_result)
                 else:
                     print('\033[031;1mCreate course failed!\033[0m')
                     exit_flag = False
@@ -599,7 +597,7 @@ class AdminView(View):
                         account_status = account_data.status
                         account_school = student_data['school']
                         account_course = ','.join(student_data['course'])
-                        print(student_data)
+                        # print(student_data)
                         account_class = ','.join(student_data['class'])
                         if not account_class:
                             account_class = "未分配班级"

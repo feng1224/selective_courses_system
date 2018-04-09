@@ -53,25 +53,7 @@ class Schools(object):
 
         :return:
         """
-        print(self.storage.db_path, name)
         if not os.path.exists('%s/%s' % (self.storage.db_path, name)):
             return True
         else:
             return False
-
-    # def set_courses(self, school, course_obj):
-    #     result = self.getter(school)
-    #     if result:
-    #         print(result.__dict__)
-    #         result.course_list[course_obj] = course_obj
-    #         print(result.__dict__)
-    #     else:
-    #         return False
-    #     #self.storage.nonquary(self)
-
-
-if __name__ == '__main__':
-    test = Schools()
-    print(test.getter('sh'))
-    print(test.set_courses('sh','haha'))
-    print(test.set_courses('sh', 'haha1'))

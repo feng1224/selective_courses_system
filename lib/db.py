@@ -140,19 +140,3 @@ def inter_file_load_data(obj, file):
 def inter_file_dump_data(obj, file, data):
     obj.dump_data(file, data)
 
-
-# 模块调试（开源后需删除）
-if __name__ == '__main__':
-    from conf import settings
-    db = inter_db_handler(settings.ACCOUNT_DATABASE)
-    print(db)
-    print(db.__dict__)
-    inter_db_connect(db)
-    db.nonquary('test',{'name':1},)
-    db = inter_db_handler(settings.BASE_DATABASE)
-    print(db)
-    print(db.__dict__)
-
-    db = inter_db_handler(settings.ADMIN_ACCOUNT_DATABASE)
-    inter_db_connect(db)
-    db.nonquary('test', {'name': 1}, )
