@@ -265,13 +265,6 @@ class StudentView(View):
                 # print(self.user_data)
                 # print(school_result['course'][course_name].__dict__)
 
-    def tell_study_record(self):
-        """ 查看学习记录视图方法
-
-        :return:
-        """
-        pass
-
     def payment(self, pay):
         """ 付款视图方法
         该方法是一个假方法，并没有任何账号支付的动作。

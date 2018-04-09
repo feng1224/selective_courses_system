@@ -63,6 +63,3 @@ class Student(Persion):
     @study_record.setter
     def study_record(self, value):
         self.__student_data = value
-
-    def register(self):
-        pass
