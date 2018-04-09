@@ -275,7 +275,7 @@ class StudentView(View):
         if not self.user_data['account_data'].study_record:
             study_record = '成绩未公布'
         else:
-            study_record = self.user_data['account_data'].study_record
+            study_record = self.user_data['account_data'].study_record.score
         info = '''
 ================学习记录=================
 
@@ -350,7 +350,15 @@ class TeacherView(View):
                 elif self.teach_class not in school_result['student'][student_name]['student_data']['class']:
                     print('\033[031;1mError: %s is not your student!\033[0m' % student_name)
                 else:
-                    print(student_name, score)
+                    confirm = input('Confirm input "yes". Back off input "b":').strip()
+                    if confirm.upper() == 'YES':
+                        username_hash = self.account.create_hash(student_name)
+                        student_data = self.account_storage.quary(username_hash)
+                        student_data['account_data'].set_score(score)
+                        self.account_storage.nonquary(username_hash, student_data)
+                        print('\033[034;1m[%s] homework to be corrected\033[0m' % student_name)
+                    elif confirm.upper() == 'B':
+                        exit_flag = False
 
 
 class AdminView(View):

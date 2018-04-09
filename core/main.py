@@ -144,7 +144,7 @@ def class_manage(obj=teacher_view):
     menu_dict = {'1': ' choice_class(obj)',
                  '2': 'tell_students(obj)',
                  '3': 'homework_correcting(obj)',
-                 '4': 'back_off(obj)'}
+                 '4': 'back_off(obj, teacher_homepage)'}
     interactive(menu, menu_dict, obj, flag=True)
 
 

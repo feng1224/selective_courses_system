@@ -2,3 +2,4 @@
 # Auther： Henry Yuan
 
 def create_school():
+    pass
