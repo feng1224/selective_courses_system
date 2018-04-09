@@ -111,14 +111,16 @@ def teacher_homepage(obj=teacher_view):
                1. 填写账户信息
                2. 查看账户信息
                3. 班级管理
-               4. 注销
+               4. 修改密码
+               5. 注销
                
 ==============================================
     '''
     menu_dict = {'1': 'set_information(obj)',
                  '2': 'tell_information(obj)',
                  '3': 'class_manage(obj)',
-                 '4': 'sign_out(obj)'}
+                 '4': 'change_password(obj)',
+                 '5': 'sign_out(obj)'}
     interactive(menu, menu_dict, obj, flag=True)
 
 

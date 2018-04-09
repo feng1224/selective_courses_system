@@ -5,6 +5,7 @@ from lib.schools import *
 from lib.courses import *
 from lib.classes import *
 from lib.db import *
+from core.logger import logger
 
 
 class View(object):
@@ -24,6 +25,7 @@ class View(object):
                  'teacher': {},
                  'student': {}
                  }
+    access_log = logger('access')
 
     def __init__(self):
         self.menu = None
@@ -45,10 +47,12 @@ class View(object):
                 if account_obj and account_obj['account_data'].account_type == account_type:  # 判断账户的类型与账户是否存在
                     self.user_data = account_obj
                     self.user_data['is_authenticated'] = True
-                    print('\033[34;1mLogin Success！\033[0m')
+                    print('\033[34;1m[%s] Login Success！\033[0m' % username)
+                    self.access_log.info('[%s] Login Success!' % username)
                     return self.user_data
+
                 else:
-                    print('\033[31;1mUsername or Password error！\033[0m')
+                    print('\033[31;1mUsername or Password error!\033[0m')
                     return False
             else:
                 return self.user_data
@@ -148,7 +152,10 @@ class View(object):
                 # print(self.user_data['account_data'].__dict__)
 
     def change_password(self):
-        # print(self.user_data['account_data'])
+        """ 修改账号密码视图方法
+
+        :return:
+        """
         exit_flag = True
         while exit_flag:
             old_password = input('Please input your old password:').strip()
@@ -169,16 +176,27 @@ class View(object):
                 print('\033[31;1mError: Old password error!\033[0m')
 
     def logout(self):
-        self.user_data = {
-            'account_id': None,
-            'is_authenticated': False,
-            'account_data': None}
-        print('\033[34;1m Account logout!\033[0m')
+        """ 退出视图方法
+
+        :return:
+        """
+        if self.user_data['account_data']:
+            username = self.user_data['account_data'].username
+            self.user_data = {
+                'account_id': None,
+                'is_authenticated': False,
+                'account_data': None}
+            print('\033[34;1m[%s] Account logout!\033[0m' % username)
+            self.access_log.info('[%s] Account logout!' % username)
         # 调试代码
         # print(self.user_data)
 
     @staticmethod
     def back_off():
+        """ 返回视图方法
+
+        :return:
+        """
         print('\033[34;1m Back off!\033[0m')
 
 
@@ -196,7 +214,7 @@ class StudentView(View):
         super(StudentView, self).__init__()
 
     def register(self, account_type, account_status):
-        """ 支持视图
+        """ 注册视图方法
 
         :param account_type:
         :param account_status:
@@ -300,6 +318,10 @@ class TeacherView(View):
         self.teach_class = None
 
     def choice_class(self):
+        """ 选择班级视图方法
+
+        :return:
+        """
         exit_flag = True
         while exit_flag:
             class_name = input('Please input name of class:').strip()
@@ -320,6 +342,10 @@ class TeacherView(View):
                         break
 
     def tell_students(self):
+        """ 查看班级的学生视图方法
+
+        :return:
+        """
         if not self.teach_class:
             print('\033[031;1mError: Please choice class first!\033[0m')
         else:
@@ -334,6 +360,10 @@ class TeacherView(View):
             print('=============================================')
 
     def homework_correcting(self):
+        """ 修改学生成绩的视图方法
+
+        :return:
+        """
         if not self.teach_class:
             print('\033[031;1mError: Please choice class first!\033[0m')
         else:
@@ -378,6 +408,11 @@ class AdminView(View):
         super(AdminView, self).__init__()
 
     def login(self, account_type):
+        """ 管理员登录视图方法
+
+        :param account_type:
+        :return:
+        """
         account_result = super(AdminView, self).login(account_type)
         if not account_result:
             return False
@@ -536,6 +571,10 @@ class AdminView(View):
                 print(school_result)
 
     def tell_student(self):
+        """ 管理员查看学校中的学生视图方法
+
+        :return:
+        """
         exit_flag = True
         while exit_flag:
             school_name = input('Please input school:').strip()
@@ -587,6 +626,10 @@ class AdminView(View):
                     # 调试代码
 
     def assign_class(self):
+        """ 管理员分配班级视图方法
+
+        :return:
+        """
         print('================分配班级=================')
         exit_flag = True
         while exit_flag:
